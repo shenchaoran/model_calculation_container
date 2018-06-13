@@ -7,6 +7,9 @@
         "bin",
         "package-lock.json",
         "package.json",
-        "resources"
+        "resources",
+        "nodemon.json",
+        "config/setting.js",
+        "npm-debug.log"
     ]
 }

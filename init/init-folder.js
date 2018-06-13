@@ -39,6 +39,7 @@ let initFolder = (fpath) => {
 };
 
 module.exports = () => {
+    console.log(__dirname)
     let folders = [
         path.join(__dirname, '../resources'),
         setting.geo_data.path,

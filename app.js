@@ -9,12 +9,13 @@ var createError = require('http-errors');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var indexRouter = require('./routes/index');
+let setting = require('./config/setting')
 
 let init = require('./init');
 init()
     .then(() => {
         //////////////////////////////////////router
-        app.set('port', process.env.PORT || 3000);
+        app.set('port', setting.port || 3000);
         preReqMid(app);
         app.use('/', indexRouter);
         postResMid(app);

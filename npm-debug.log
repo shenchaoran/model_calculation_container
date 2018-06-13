@@ -1,0 +1,44 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/nodejs', '/usr/bin/npm', 'run', 'debug' ]
+2 info using npm@3.5.2
+3 info using node@v4.2.6
+4 verbose run-script [ 'predebug', 'debug', 'postdebug' ]
+5 info lifecycle model-comparison-container@0.0.0~predebug: model-comparison-container@0.0.0
+6 silly lifecycle model-comparison-container@0.0.0~predebug: no script for predebug, continuing
+7 info lifecycle model-comparison-container@0.0.0~debug: model-comparison-container@0.0.0
+8 verbose lifecycle model-comparison-container@0.0.0~debug: unsafe-perm in lifecycle true
+9 verbose lifecycle model-comparison-container@0.0.0~debug: PATH: /usr/share/npm/bin/node-gyp-bin:/home/shencr/Projects/model_comparison_container/node_modules/.bin:/opt/intel/compilers_and_libraries_2018.3.222/linux/mpirt/bin/ia32_lin:/opt/intel/compilers_and_libraries_2018.3.222/linux/bin/intel64:/opt/intel/compilers_and_libraries_2018.3.222/linux/mpirt/bin/ia32_lin:/opt/intel/compilers_and_libraries_2018.3.222/linux/bin/intel64:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/db/bin:/usr/lib/jvm/java-8-oracle/jre/bin:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/db/bin:/usr/lib/jvm/java-8-oracle/jre/bin:/opt/node-v8.11.2-linux-x64/bin:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/jre/bin:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/jre/bin
+10 verbose lifecycle model-comparison-container@0.0.0~debug: CWD: /home/shencr/Projects/model_comparison_container
+11 silly lifecycle model-comparison-container@0.0.0~debug: Args: [ '-c', 'set PORT=1988 && nodemon app.js' ]
+12 info lifecycle model-comparison-container@0.0.0~debug: Failed to exec debug script
+13 verbose stack Error: model-comparison-container@0.0.0 debug: `set PORT=1988 && nodemon app.js`
+13 verbose stack spawn ENOENT
+13 verbose stack     at ChildProcess.<anonymous> (/usr/share/npm/lib/utils/spawn.js:17:16)
+13 verbose stack     at emitTwo (events.js:87:13)
+13 verbose stack     at ChildProcess.emit (events.js:172:7)
+13 verbose stack     at maybeClose (internal/child_process.js:821:16)
+13 verbose stack     at Process.ChildProcess._handle.onexit (internal/child_process.js:211:5)
+14 verbose pkgid model-comparison-container@0.0.0
+15 verbose cwd /home/shencr/Projects/model_comparison_container
+16 error Linux 4.4.0-127-generic
+17 error argv "/usr/bin/nodejs" "/usr/bin/npm" "run" "debug"
+18 error node v4.2.6
+19 error npm  v3.5.2
+20 error file sh
+21 error code ELIFECYCLE
+22 error errno ENOENT
+23 error syscall spawn
+24 error model-comparison-container@0.0.0 debug: `set PORT=1988 && nodemon app.js`
+24 error spawn ENOENT
+25 error Failed at the model-comparison-container@0.0.0 debug script 'set PORT=1988 && nodemon app.js'.
+25 error Make sure you have the latest version of node.js and npm installed.
+25 error If you do, this is most likely a problem with the model-comparison-container package,
+25 error not with npm itself.
+25 error Tell the author that this fails on your system:
+25 error     set PORT=1988 && nodemon app.js
+25 error You can get information on how to open an issue for this project with:
+25 error     npm bugs model-comparison-container
+25 error Or if that isn't available, you can get their info via:
+25 error     npm owner ls model-comparison-container
+25 error There is likely additional logging output above.
+26 verbose exit [ 1, true ]

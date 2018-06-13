@@ -1,26 +1,26 @@
 {
-  "name": "model-comparison-container",
-  "version": "0.0.0",
-  "private": true,
-  "scripts": {
-    "start": "set PORT=1988 && node app.js",
-    "debug": "set PORT=1988 && nodemon app.js"
-  },
-  "dependencies": {
-    "bluebird": "^3.5.1",
-    "compression": "^1.7.2",
-    "cookie-parser": "~1.4.3",
-    "debug": "~2.6.9",
-    "express": "~4.16.0",
-    "express-session": "^1.15.6",
-    "express-validator": "^5.2.0",
-    "http-errors": "~1.6.2",
-    "jade": "~1.11.0",
-    "jwt-simple": "^0.5.1",
-    "lodash": "^4.17.10",
-    "mongodb": "^3.0.7",
-    "mongoose": "^5.0.16",
-    "morgan": "~1.9.0",
-    "serve-favicon": "^2.5.0"
-  }
+    "name": "model-comparison-container",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "start": "node app.js",
+        "debug": "nodemon app.js"
+    },
+    "dependencies": {
+        "bluebird": "^3.5.1",
+        "compression": "^1.7.2",
+        "cookie-parser": "~1.4.3",
+        "debug": "~2.6.9",
+        "express": "~4.16.0",
+        "express-session": "^1.15.6",
+        "express-validator": "^5.2.0",
+        "http-errors": "~1.6.2",
+        "jade": "~1.11.0",
+        "jwt-simple": "^0.5.1",
+        "lodash": "^4.17.10",
+        "mongodb": "^3.0.7",
+        "mongoose": "^5.0.16",
+        "morgan": "~1.9.0",
+        "serve-favicon": "^2.5.0"
+    }
 }

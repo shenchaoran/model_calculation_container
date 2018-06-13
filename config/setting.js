@@ -3,6 +3,7 @@ let fs = require('fs')
 let path = require('path')
 
 module.exports = {
+    port: 1900,
     auth: false,
     jwt_secret: 'asdl;fjl;asdjflasjkfsl;jfdl;asdfjl;asdjkflsda',
     platform: (function() {
@@ -14,7 +15,7 @@ module.exports = {
     })(),
     mongodb: {
         name: 'model_comparison_container',
-        host: '127.0.0.1',
+        host: '172.31.96.1',
         port: '27017'
     },
     geo_data: {
