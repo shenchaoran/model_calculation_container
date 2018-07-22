@@ -1,28 +1,32 @@
 let express = require('express');
 let BaseRoute = require('./base.route')
 let db = require('../models/services.model');
+let msCtrl = new require('../controllers/services.controller')()
 
 const defaultRoutes = [
     'findAll',
-    'insert',
-    'find',
-    'remove'
+    'find'
 ];
 const router = express.Router();
 module.exports = router;
 
-router.route('/:id')
-    .get((req, res, next) => {
-        DataCtrl.download(req.params.id)
-            .then(rst => {
-                res.set({
-                    'Content-Type': 'file/*',
-                    'Content-Length': rst.length,
-                    'Content-Disposition': 'attachment;filename=' +
-                        encodeURIComponent(rst.filename)
-                });
-                return res.end(rst.data);
-            });
+/**
+ * return { code }
+ * 
+ * req.body: calcuTask {
+ *      ...
+ *      ms
+ * }
+ */
+router.route('/:id/invoke')
+    .post((req, res, next) => {
+        if(req.body.calcuTask) {
+            msCtrl.invoke(req.body.calcuTask)
+                .then(msg => {
+                    return res.json(msg)
+                })
+                .catch(next)
+        }
     });
 
 BaseRoute(router, db, defaultRoutes);

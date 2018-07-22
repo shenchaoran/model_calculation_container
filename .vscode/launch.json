@@ -7,8 +7,22 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Launch test",
+            "program": "${workspaceFolder}/controllers/test.js"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Launch",
             "program": "${workspaceFolder}/app.js"
+        },
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Attach",
+            "port": 24688,
+            "restart": true,
+            "timeout": 600000
         }
     ]
 }

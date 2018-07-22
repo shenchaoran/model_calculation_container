@@ -1,8 +1,15 @@
 let Mongoose = require('./mongoose.base')
+const mongoose = require('mongoose');
 
-let collectionName = 'Models'
+let collectionName = 'Model_Service'
 let schema = {
-    name: String
+    auth: mongoose.Schema.Types.Mixed,
+    MDL: mongoose.Schema.Types.Mixed,
+    stdId: String,
+    stdClass: String,
+    topic: String,
+    path: String,
+    exeName: String
 }
 
 module.exports = new Mongoose(collectionName, schema);
