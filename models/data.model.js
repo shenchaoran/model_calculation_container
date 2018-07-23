@@ -11,7 +11,7 @@ let schema = {
         src: String,
         userId: String
     },
-    udxcfg: mongoose.Schema.Types.Mixed
+    udxcfg: mongoose.Schema.Types.Mixed // maybe no use
 };
 let collectionName = 'Geo_Data';
 let geoDataDB = new Mongoose(collectionName, schema);

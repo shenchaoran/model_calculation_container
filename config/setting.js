@@ -31,15 +31,9 @@ module.exports = {
     },
     invoke_failed_tag: '-----this is an error identification-----',
     progressReg: /-----Progress:(.*)%-----/,
-    // ?????????????????
+    // 由 STD 转换重构过来的数据路径
     STD_DATA: {
-        IBIS_STD_DATA: [
-            {
-                stdId: "5b541c1c24e1406240986886",
-                inputPath: '~/STD_DATA/IBIS_2.6b4/input',
-                outputPath: '~/STD_DATA/IBIS_2.6b4/output'
-            }
-        ],
+        'IBIS_2.6b4': '~/STD_DATA/IBIS_2.6b4',
         BIOME_BGC_STD_DATA: {
             inputPath: 'E:/Data/Biome_BGC_Data',
             outputPath: 'E:/Data/Biome_BGC_Data/outputs'

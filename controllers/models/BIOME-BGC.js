@@ -6,17 +6,21 @@ class BIOME_BGC extends CarbonModelBase {
      *      exist: boolean
      *      path: string
      * }
-     * @param {*} doc 
      */
-    static statEXE(doc) {
+    statEXE() {
 
     }
 
-    static invokeBySTD() {
+    /**
+     *
+     *
+     * @memberof BIOME_BGC
+     */
+    invokeBySTD() {
 
     }
     
-    static invokeByDIY() {
+    invokeByDIY() {
     
     }
 }

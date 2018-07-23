@@ -6,9 +6,9 @@ let schema = {
     meta: mongoose.Schema.Types.Mixed,
     auth: mongoose.Schema.Types.Mixed,
     ms: mongoose.Schema.Types.Mixed,
-    topic: mongoose.Schema.Types.Mixed,
+    topic: String,
     cmpTaskId: String,
-    node: mongoose.Schema.Types.Mixed,
+    node: mongoose.Schema.Types.Mixed,  // maybe no use
     IO: mongoose.Schema.Types.Mixed,
     std: mongoose.Schema.Types.Mixed,
     state: String,

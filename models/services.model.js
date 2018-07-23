@@ -5,10 +5,8 @@ let collectionName = 'Model_Service'
 let schema = {
     auth: mongoose.Schema.Types.Mixed,
     MDL: mongoose.Schema.Types.Mixed,
-    stdId: String,
-    stdClass: String,
+    stdIds: mongoose.Schema.Types.Mixed,
     topic: String,
-    path: String,
     exeName: String
 }
 
