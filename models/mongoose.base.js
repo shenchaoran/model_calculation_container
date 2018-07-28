@@ -16,15 +16,15 @@ const url =
 mongoose.connect(url);
 
 mongoose.connection.on('connected', () => {
-    console.log('Mongoose connected');
+    console.log(`******** Mongoose connected: ${url}`);
 });
 
 mongoose.connection.on('error', (err) => {
-    console.log('Mongoose err\n' + err);
+    console.log('******** Mongoose err:\n' + err);
 });
 
 mongoose.connection.on('disconnected', () => {
-    console.log('Mongoose disconnected');
+    console.log('******** Mongoose disconnected');
 });
 
 module.exports = function(collectionName, schema) {

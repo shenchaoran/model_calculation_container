@@ -1,7 +1,8 @@
 let express = require('express');
 let BaseRoute = require('./base.route')
 let db = require('../models/services.model');
-let msCtrl = new require('../controllers/services.controller')()
+let MSFactory = require('../controllers/services.controller')
+let msCtrl = new MSFactory()
 
 const defaultRoutes = [
     'findAll',
@@ -18,7 +19,7 @@ module.exports = router;
  *      ms
  * }
  */
-router.route('/:id/invoke')
+router.route('/invoke')
     .post((req, res, next) => {
         if(req.body.calcuTask) {
             msCtrl.invoke(req.body.calcuTask)

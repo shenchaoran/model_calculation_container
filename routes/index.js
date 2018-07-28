@@ -1,5 +1,6 @@
 let express = require('express');
 let router = express.Router();
+let setting = require('../config/setting')
 module.exports = router;
 
 let servicesRoute = require('./services.route');
@@ -19,7 +20,7 @@ router.route('/index')
     .get((req, res, next) => {
         return res.json({
             code: 200,
-            data: 'model calculation container'
+            data: `model calculation container, server name: ${setting.nodeName}`
         });
     });
 

@@ -48,8 +48,8 @@ init()
             const addr = server.address();
             const bind =
                 typeof addr === 'string' ?
-                'Pipe: ' + addr :
-                'Port: ' + addr.port;
+                '******** Pipe: ' + addr :
+                '******** Port: ' + addr.port;
             console.log(bind);
         });
     });

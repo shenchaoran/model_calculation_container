@@ -3,9 +3,12 @@ let Promise = require('bluebird')
 let fs = Promise.promisifyAll(require('fs'))
 let _ = require('lodash')
 let uuidv1 = require('uuid/v1')
+let child_process = require('child_process')
 let exec = child_process.exec
 let spawn = child_process.spawn
 let msrDB = require('../../models/records.model')
+let path = require('path')
+let setting = require('../../config/setting')
 
 /**
  * 模型控制类
@@ -19,9 +22,10 @@ let msrDB = require('../../models/records.model')
  */
 module.exports = class IBIS extends CarbonModelBase {
     constructor(calcuTask) {
+        super()
         this.modelName = 'IBIS_2.6b4'
 
-        this.folder = path.join(setting.geo_models.path, this.modelName + '_' + this.calcuTask.ms._id)
+        this.folder = path.join(setting.geo_models.path, this.modelName + '_' + calcuTask.ms._id)
         this.exeName = undefined
         this.exePath = undefined
         this.cwd = path.join(this.folder, 'debug')
@@ -30,7 +34,7 @@ module.exports = class IBIS extends CarbonModelBase {
 
         this.ms = calcuTask.ms
         this.msr = calcuTask
-        this.stdData = calcuTask.stdData
+        this.stdData = calcuTask.std
     }
 
     /**
@@ -39,7 +43,7 @@ module.exports = class IBIS extends CarbonModelBase {
      */
     getIOstr() {
         if(this.msr.IO.dataSrc === 'STD') {
-            this.stdPath = path.join(setting.STD_DATA[this.name], this.stdData._id)
+            this.stdPath = path.join(setting.STD_DATA[this.modelName], this.stdData._id)
             // 对于标准数据集，运行过后生成一个 flag空文件，下次就不运行了：文件结构如下
             // [
             //     {
@@ -173,7 +177,7 @@ module.exports = class IBIS extends CarbonModelBase {
                         let IOstr = ''
                         for(let key in ios) {
                             let inPath = path.join(this.stdPath, ios[key])
-                            IOstr += `--${key}='${inPath}' `
+                            IOstr += `--${key}=${inPath} `
                         }
                         this.cmdLine = IOstr
                         return Promise.resolve(undefined)
@@ -214,11 +218,9 @@ module.exports = class IBIS extends CarbonModelBase {
 
     /**
      * resolve:
-     *      return {
-     *           path: string
-     *      }
+     *      path: string
      * reject: 
-     *      return err (unexist)
+     *      err (unexist)
      */
     statEXE() {
         let compileParas = {}
@@ -255,12 +257,12 @@ module.exports = class IBIS extends CarbonModelBase {
                     // modify sources(compar.h and makefile) -> compile -> add db record
                     let comparPath = path.join(this.folder, 'src/compar.h')
                     let makefilePath = path.join(this.folder, 'makefile')
-                    return Promise.map([
+                    return Promise.all([
                         // modify and save compar.h
                         fs.readFileAsync(comparPath, 'utf-8')
                             .then(buf => {
                                 let str = buf.toString()
-                                let comparFlag = '---modify_flag_of_auto_compile---'
+                                let comparFlag = 'c---modify_flag_of_auto_compile---'
                                 let startI = str.indexOf(comparFlag)
                                 let endI = str.lastIndexOf(comparFlag)
                                 let substr = str.substring(startI, endI)
@@ -278,8 +280,8 @@ module.exports = class IBIS extends CarbonModelBase {
                         fs.readFileAsync(makefilePath, 'utf-8')
                             .then(buf => {
                                 let str = buf.toString()
-                                str.replace(/(EXENAME\s*=\s*)((\w+|\d+|\.|\-|\_)*)/s, `$1${newVersion.exeName}`)
-                                return Promise.resolve(str)
+                                let newStr = str.replace(/(EXENAME\s*=\s*)((\w+|\d+|\.|\-|\_)*)/s, `$1${newVersion.exeName}`)
+                                return Promise.resolve(newStr)
                             })
                             .then(str => {
                                 return fs.writeFileAsync(makefilePath, str)
@@ -305,11 +307,14 @@ module.exports = class IBIS extends CarbonModelBase {
                             });
                         })
                         .then(() => {
-                            versions.push(thisVersion)
+                            versions.push(newVersion)
                             return fs.writeFileAsync(versionPath, JSON.stringify(versions))
                         })
                         .then(() => Promise.resolve(this.exePath))
-                        .catch(Promise.reject)
+                        .catch(e => {
+                            console.log(e)
+                            Promise.reject(e)
+                        })
                 }
             })
     }
@@ -322,8 +327,8 @@ module.exports = class IBIS extends CarbonModelBase {
      */
     invoke() {
         return this.statEXE()
-            .then(stats => {
-                if(stats.exist) {
+            .then(exePath => {
+                if(exePath) {
                     this.invokeAndDaemon()
                     return Promise.resolve({ code: 200} )
                 }

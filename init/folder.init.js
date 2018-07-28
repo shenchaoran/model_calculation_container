@@ -8,7 +8,7 @@ let initFolder = (fpath) => {
     return new Promise((resolve, reject) => {
         fs.stat(fpath, (err, stats) => {
             if (err) {
-                console.log(`Init folder: ${fpath}`);
+                console.log(`******** Init folder: ${fpath}`);
                 if (err.code === 'ENOENT') {
                     fs.mkdir(fpath, err => {
                         if (err) {
