@@ -1,3 +1,4 @@
 node_modules
 /resources
 config/setting.js
+test/writeSteam.test.txt

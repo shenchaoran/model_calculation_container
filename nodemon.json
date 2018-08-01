@@ -8,6 +8,8 @@
         "package-lock.json",
         "package.json",
         "resources",
+        "resources/geo-models",
+        "resources/geo-data",
         "nodemon.json",
         "config/setting.js",
         "npm-debug.log"

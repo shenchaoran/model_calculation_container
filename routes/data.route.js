@@ -33,12 +33,37 @@ router.route('/')
         });
     });
 
+router.route('/download')
+    .get((req, res, next) => {
+        if(req.query.msrId && req.query.eventId) {
+            DataCtrl.downloadByMSR(req.query.msrId, req.query.eventId)
+                .then(({stream, fname}) => {
+                    res.set({
+                        'Content-Type': 'file/*',
+                        'Content-Disposition':
+                            'attachment;filename=' +
+                            fname
+                    });
+                    return stream.pipe(res)
+                })
+                .catch(e => {
+                    return next(e)
+                })
+        }
+        else {
+            return res.json({
+                code: 400,
+                desc: 'invalid request query parameters'
+            })
+        }
+    })
+
 /**
  * file
  */
 router.route('/:id')
     .get((req, res, next) => {
-        DataCtrl.download(req.params.id)
+        DataCtrl.downloadById(req.params.id)
             .then(msg => {
                 return res.download(msg.path, msg.fname);
             });

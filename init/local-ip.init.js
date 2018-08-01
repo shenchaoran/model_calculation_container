@@ -5,6 +5,7 @@ let nodeDB = require('../models/node.model')
 
 module.exports = () => {
     global.ipv4 = IPCtrl.getLocalIP()
+    console.log('******** local IP: ' + global.ipv4)
     return nodeDB.update({ 'auth.nodeName': setting.nodeName }, {
         $set: {
             host: global.ipv4,
