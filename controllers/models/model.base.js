@@ -164,13 +164,17 @@ module.exports = class ModelBase {
                 } else {
                     let group = _.filter(this.cmdLine.split(/\s+/), str => str.trim() !== '');
                     // console.log(this.cmdLine);
-                    let updateProgress = (type, progress) => {
-                        if (progress) {
-                            this.msr.progress = progress;
-                            this.msr.state = progress >= 100 ? 'FINISHED_SUCCEED' : 'RUNNING';
-                        } else {
-                            this.msr.state = type === 'succeed' ? 'FINISHED_SUCCEED' : 'FINISHED_FAILED';
-                            this.msr.progress = type === 'succeed' ? 100 : -1;
+                    let updateProgress = (status) => {
+                        this.msr.state = status
+                        switch (this.msr.state) {
+                            case 'FINISHED_SUCCEED':
+                                this.msr.progress = 100
+                                break
+                            case 'RUNNING':
+                                this.msr.progress = this.msr.progress> 100? 100: this.msr.progress
+                                break
+                            case 'FINISHED_FAILED':
+                                break
                         }
 
                         calcuTaskDB.update({
@@ -218,17 +222,19 @@ module.exports = class ModelBase {
                                 }
                             })
                     }
+
                     cp.stdout.on('data', data => {
                         let str = data.toString();
                         if (str.indexOf(setting.invoke_failed_tag) !== -1) {
-                            updateProgress('failed');
+                            updateProgress('FINISHED_FAILED');
                         } else {
                             // 更新 process
                             let group = str.match(setting.progressReg);
                             let progress = group ? group[group.length - 1] : undefined;
                             if (progress) {
                                 console.log('Progress: ', progress);
-                                updateProgress(undefined, parseFloat(progress));
+                                this.msr.progress = parseFloat(progress)
+                                updateProgress('RUNNING');
                             }
                         }
                     });
@@ -241,9 +247,9 @@ module.exports = class ModelBase {
                     cp.on('close', code => {
                         console.log(`********${this.modelName} finished code: ${code}`, '\t', code === 0 ? 'succeed' : 'failed');
                         if (code === 0) {
-                            updateProgress('succeed');
+                            updateProgress('FINISHED_SUCCEED');
                         } else {
-                            updateProgress('failed');
+                            updateProgress('FINISHED_FAILED');
                         }
                     });
                 }
