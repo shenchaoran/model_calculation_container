@@ -2,19 +2,33 @@ let path = require('path')
 let Promise = require('bluebird')
 let fs = Promise.promisifyAll(require('fs'))
 let RequestUtil = require('../utils/request.utils')
+let { Observable, interval, from, of, forkJoin } = require('rxjs')
+let { startWith, map, flatMap, switchMap, filter, mergeMap, take, bufferCount } = require('rxjs/operators')
 
-new Promise((resolve, reject) => {
-    Promise.resolve(1)
-        .then(v => {
-            throw v
-        })
-        .then(v => {
-            console.log('in then:', v)
-        }) 
-        .catch(v => {
-            console.log('in catch:', v)
-        })
-});
+interval(10).pipe(
+    take(5),
+    map(of),
+    bufferCount(5),
+    flatMap(v => forkJoin(...v))
+)
+    .subscribe(v => {
+        console.log(v)
+    })
+
+
+
+// new Promise((resolve, reject) => {
+//     Promise.resolve(1)
+//         .then(v => {
+//             throw v
+//         })
+//         .then(v => {
+//             console.log('in then:', v)
+//         }) 
+//         .catch(v => {
+//             console.log('in catch:', v)
+//         })
+// });
 
 // class Base {
 //     constructor(a) {

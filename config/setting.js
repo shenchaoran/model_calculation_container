@@ -13,7 +13,7 @@ module.exports = {
         port: 3122,
         use: true
     },
-    platform: (function() {
+    platform: (function () {
         let platform = 1;
         if (os.type() == 'Linux') {
             platform = 2;
@@ -21,8 +21,8 @@ module.exports = {
         return platform;
     })(),
     portal: {
-   	host: '192.168.1.131',
-	port: '9999'
+        host: '192.168.1.131',
+        port: '9999'
     },
     mongodb: {
         name: 'Comparison',

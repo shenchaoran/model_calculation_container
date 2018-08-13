@@ -1,3 +1,8 @@
+process.env.DEBUG='WebNJGIS:*,-not_this '
+process.env.DEBUG_COLORS=5 
+process.env.DEBUG_HIDE_DATE=true 
+process.env.DEBUG_FD=1
+
 const _ = require('lodash');
 const preReqMid = require('./middlewares/pre-request.middleware');
 const postResMid = require('./middlewares/post-response.middleware');
