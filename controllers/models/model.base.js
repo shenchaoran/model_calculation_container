@@ -170,7 +170,6 @@ module.exports = class ModelBase {
                         switch (this.msr.state) {
                             case 'FINISHED_SUCCEED':
                                 this.msr.progress = 100
-                                this.emitCacheDataMsg()
                                 break
                             case 'RUNNING':
                                 this.msr.progress = this.msr.progress> 100? 100: this.msr.progress
@@ -333,22 +332,14 @@ module.exports = class ModelBase {
                     fpath = this.ios[eventId]
                     fname = this.ioFname[eventId]
                 }
+                if(fpath.indexOf('mtc43')!== -1) {
+                    fpath;
+                }
                 return Promise.resolve({
                     stream: fs.createReadStream(fpath),
                     fname: fname
                 })
             })
             .catch(Promise.reject)
-    }
-
-    emitCacheDataMsg() {
-        let url = `http://${setting.portal.host}:${setting.portal.port}/nodes/cache-data/${this.msr._id}`
-        RequestUtil.getByServer(url)
-            .then(res => {
-                res = JSON.parse(res)
-                if(!res.error) {
-                    console.log('******* Start cache data of msr: ' + this.msr._id)
-                }
-            })
     }
 }
