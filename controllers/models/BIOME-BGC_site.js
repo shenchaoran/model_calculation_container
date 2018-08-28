@@ -15,13 +15,13 @@ let ObjectID = require('mongodb').ObjectID
 module.exports = class BIOME_BGC_site extends CarbonModelBase {
     constructor(calcuTask) {
         super(calcuTask)
-        if(this.stdData) {
+        if (this.stdData) {
             let index = _
                 .chain(calcuTask.IO.std)
                 .find(item => item.id === '--index')
                 .get('value')
                 .value()
-            if(!index)
+            if (!index)
                 this.constructorSucceed = false
             this.logPath = path.join(this.logsFolder, `${index}_${this.msr._id}.log`)
             this.prefixIO = ['-a']
@@ -45,22 +45,21 @@ module.exports = class BIOME_BGC_site extends CarbonModelBase {
                 '--ro': `./restart/${index}.endpoint`,
                 '--co2': `./co2/co2.txt`,
                 '--epc': `./epc/shrub.epc`,
-                '--o': `./outputs/${index}`     // TODO 这里其实是一个前缀，下载文件时，要当成两个数据处理
+                '--o': `./outputs/${index}` // TODO 这里其实是一个前缀，下载文件时，要当成两个数据处理
             }
             // 输出文件的后缀，
             // this.oSuffix = {
             //     '--do': '.dayout.ascii',
             //     '--ao': '.annout.ascii'
             // }
-        }
-        else {
+        } else {
             this.logsFolder = setting.geo_data.path
             this.logPath = path.join(this.logsFolder, `${this.msr._id}.log`)
         }
     }
 
     initialization() {
-        for(let key in this.ios) {
+        for (let key in this.ios) {
             this.ioFname[key] = path.basename(this.ios[key])
         }
         if (this.stdData && this.msr.IO.dataSrc === 'STD') {
@@ -79,29 +78,29 @@ module.exports = class BIOME_BGC_site extends CarbonModelBase {
             this.ios['--do'] = path.join(this.ios['--o'] + '.dayout.ascii')
             this.ios['--ao'] = path.join(this.ios['--o'] + '.annout.ascii')
         } else {
-            for(let key of this.prefixIO) {
+            for (let key of this.prefixIO) {
                 this.cmdLine += this.prefixIO[key] + ' '
             }
             let oid = this.msr._id
-            if(typeof oid !== 'string') {
+            if (typeof oid !== 'string') {
                 oid = oid.toHexString()
             }
             // TODO 对输入输出文件的处理
-            let joinIOStr = (type) => {
+            for (let key in this.msr.IO) {
+                if (key !== 'inputs' || key !== 'outputs' || key !== 'parameters')
+                    return;
                 _.map(this.msr.IO[type], event => {
-                    if(event.id === '--do' || event.id === '--ao'){
+                    if (event.id === '--do' || event.id === '--ao') {
                         this.ioFname[event.id] = event.fname
                         this.ios[event.id] = path.join(setting.geo_data.path, oid + event.ext)
-                    }
-                    else {
+                    } else {
                         if (type === 'outputs') {
                             event.value = new ObjectID().toHexString();
                         }
                         if (type === 'parameters') {
                             if (event.value)
                                 this.cmdLine += `${event.id}=${event.value}`
-                        }
-                        else if (event.value && event.value !== '') {
+                        } else if (event.value && event.value !== '') {
                             let fpath = path.join(setting.geo_data.path, event.value + event.ext);
                             this.ios[event.id] = fpath
                             this.ioFname[event.id] = event.fname
@@ -110,13 +109,10 @@ module.exports = class BIOME_BGC_site extends CarbonModelBase {
                     }
                 });
             }
-            joinIOStr('inputs');
-            joinIOStr('outputs');
-            joinIOStr('parameters');
             this.cmdLine += `--o=${path.join(setting.geo_data.path, oid)} `
         }
         _.map(this.msr.IO.outputs, output => {
-            if(_.lastIndexOf(output.fname, output.ext) === -1) {
+            if (_.lastIndexOf(output.fname, output.ext) === -1) {
                 output.fname += output.ext
             }
             let reg = new RegExp(`(${output.ext})+$`)

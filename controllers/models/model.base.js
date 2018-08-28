@@ -45,13 +45,12 @@ module.exports = class ModelBase {
         this.stdData = calcuTask.std
 
         this.constructorSucceed = true
-        if(this.stdData && this.msr.IO.dataSrc === 'STD') {
+        if (this.stdData && this.msr.IO.dataSrc === 'STD') {
             this.stdPath = path.join(setting.STD_DATA[this.modelName], this.stdData._id)
             this.logsFolder = path.join(this.stdPath, 'logs')
             this.recordsPath = path.join(this.stdPath, 'std_records.json')
             this.needUpdateSTDRecord = undefined
-        }
-        else {
+        } else {
             this.needUpdateSTDRecord = false
         }
         this.cmdLine = ''
@@ -63,7 +62,7 @@ module.exports = class ModelBase {
      * 2. 求 cmdLine 和 ios
      */
     initialization() {
-        for(let key in this.ios) {
+        for (let key in this.ios) {
             this.ioFname[key] = path.basename(this.ios[key])
         }
         if (this.stdData && this.msr.IO.dataSrc === 'STD') {
@@ -81,7 +80,9 @@ module.exports = class ModelBase {
             })
         } else {
             // TODO 对输入输出文件的处理
-            let joinIOStr = (type) => {
+            for (let key in this.msr.IO) {
+                if (key !== 'inputs' || key !== 'outputs' || key !== 'parameters')
+                    return;
                 _.map(this.msr.IO[type], event => {
                     if (type === 'outputs') {
                         event.value = new ObjectID().toHexString();
@@ -89,8 +90,7 @@ module.exports = class ModelBase {
                     if (type === 'parameters') {
                         if (event.value)
                             this.cmdLine += `${event.id}=${event.value}`
-                    }
-                    else if (event.value && event.value !== '') {
+                    } else if (event.value && event.value !== '') {
                         let fpath = path.join(setting.geo_data.path, event.value + event.ext);
                         this.ios[event.id] = fpath
                         this.ioFname[event.id] = event.fname
@@ -98,12 +98,9 @@ module.exports = class ModelBase {
                     }
                 });
             }
-            joinIOStr('inputs');
-            joinIOStr('outputs');
-            joinIOStr('parameters');
         }
         _.map(this.msr.IO.outputs, output => {
-            if(_.lastIndexOf(output.fname, output.ext) === -1) {
+            if (_.lastIndexOf(output.fname, output.ext) === -1) {
                 output.fname += output.ext
             }
             let reg = new RegExp(`(${output.ext})+$`)
@@ -146,22 +143,22 @@ module.exports = class ModelBase {
             .then(msrId => {
                 if (msrId) {
                     calcuTaskDB.findOne({
-                        _id: msrId
-                    })
-                    .then(doc => {
-                        return calcuTaskDB.update({
-                            _id: this.msr._id
-                        }, {
-                            $set: {
-                                IO: doc.IO,
-                                state: doc.state,
-                                progress: doc.progress
-                            }
+                            _id: msrId
                         })
-                    })
-                    .catch(e => {
-                        console.log(e)
-                    })
+                        .then(doc => {
+                            return calcuTaskDB.update({
+                                _id: this.msr._id
+                            }, {
+                                $set: {
+                                    IO: doc.IO,
+                                    state: doc.state,
+                                    progress: doc.progress
+                                }
+                            })
+                        })
+                        .catch(e => {
+                            console.log(e)
+                        })
                 } else {
                     let group = _.filter(this.cmdLine.split(/\s+/), str => str.trim() !== '');
                     // console.log(this.cmdLine);
@@ -172,7 +169,7 @@ module.exports = class ModelBase {
                                 this.msr.progress = 100
                                 break
                             case 'RUNNING':
-                                this.msr.progress = this.msr.progress> 100? 100: this.msr.progress
+                                this.msr.progress = this.msr.progress > 100 ? 100 : this.msr.progress
                                 break
                             case 'FINISHED_FAILED':
                                 break
@@ -277,8 +274,7 @@ module.exports = class ModelBase {
         return Promise.resolve(undefined)
         if (this.msr.IO.dataSrc !== 'STD') {
             return Promise.resolve(undefined)
-        }
-        else {
+        } else {
             return new Promise((resolve, reject) => {
                 fs.readFileAsync(this.recordsPath, 'utf-8')
                     .then(buf => {
@@ -320,11 +316,10 @@ module.exports = class ModelBase {
             .then(() => {
                 let fpath, fname
                 if (eventId === 'log') {
-                    if(this.stdData) {
+                    if (this.stdData) {
 
-                    }
-                    else {
-                        
+                    } else {
+
                     }
                     fpath = this.logPath
                     fname = path.basename(fpath)
@@ -332,7 +327,7 @@ module.exports = class ModelBase {
                     fpath = this.ios[eventId]
                     fname = this.ioFname[eventId]
                 }
-                if(fpath.indexOf('mtc43')!== -1) {
+                if (fpath.indexOf('mtc43') !== -1) {
                     fpath;
                 }
                 return Promise.resolve({
