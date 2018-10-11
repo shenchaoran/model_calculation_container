@@ -55,6 +55,7 @@ init()
                 typeof addr === 'string' ?
                 '******** Pipe: ' + addr :
                 '******** Port: ' + addr.port;
+            console.log(`******** start server succeed`);
             console.log(bind);
         });
     });
