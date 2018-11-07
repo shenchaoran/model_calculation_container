@@ -1,8 +1,8 @@
-let Mongoose = require('./mongoose.base')
+const Mongoose = require('./mongoose.base')
 const mongoose = require('mongoose');
 
-let collectionName = 'Calcu_Task'
-let schema = {
+const collectionName = 'Calcu_Task'
+const schema = {
     meta: mongoose.Schema.Types.Mixed,
     auth: mongoose.Schema.Types.Mixed,
     cmpTaskId: String,

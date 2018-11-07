@@ -1,8 +1,8 @@
-let Mongoose = require('./mongoose.base')
+const Mongoose = require('./mongoose.base')
 const mongoose = require('mongoose');
 
-let collectionName = 'Model_Service'
-let schema = {
+const collectionName = 'Model_Service'
+const schema = {
     auth: mongoose.Schema.Types.Mixed,
     MDL: mongoose.Schema.Types.Mixed,
     stdIds: mongoose.Schema.Types.Mixed,

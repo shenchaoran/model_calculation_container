@@ -23,9 +23,7 @@ router.route('/invoke')
     .post((req, res, next) => {
         if(req.body.calcuTask) {
             msCtrl.invoke(req.body.calcuTask)
-                .then(msg => {
-                    return res.json(msg)
-                })
+                .then(msg => res.json(msg))
                 .catch(next)
         }
     });

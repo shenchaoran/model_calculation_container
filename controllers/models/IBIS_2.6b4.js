@@ -22,8 +22,8 @@ let ObjectID = require('mongodb').ObjectID
  * @extends {CarbonModelBase}
  */
 module.exports = class IBIS_26b4 extends CarbonModelBase {
-    constructor(calcuTask) {
-        super(calcuTask)
+    constructor(calcuTask, ms, std) {
+        super(calcuTask, ms, std)
 
         if (this.stdData) {
             this.exeName = undefined

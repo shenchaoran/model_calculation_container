@@ -1,7 +1,7 @@
-let Mongoose = require('./mongoose.base');
-let mongoose = require('mongoose');
+const Mongoose = require('./mongoose.base');
+const mongoose = require('mongoose');
 
-let schema = {
+const schema = {
     meta: {
         desc: String,
         path: String,
@@ -13,7 +13,7 @@ let schema = {
     },
     udxcfg: mongoose.Schema.Types.Mixed // maybe no use
 };
-let collectionName = 'Geo_Data';
-let geoDataDB = new Mongoose(collectionName, schema);
+const collectionName = 'Geo_Data';
+const geoDataDB = new Mongoose(collectionName, schema);
 
 module.exports = geoDataDB;

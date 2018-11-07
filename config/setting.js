@@ -46,8 +46,9 @@ module.exports = {
     // 这里的 key 是 ms 数据库中的 model name，模型根据这里的配置找到标准数据集的路径
     // 换部署服务器时，这里也要更新成对应的文件路径
     STD_DATA: {
-        'IBIS_2.6b4': '/home/shencr/STD_DATA/IBIS_2.6b4',
+        // 'IBIS_2.6b4': '/home/shencr/STD_DATA/IBIS_2.6b4',
         'IBIS site': 'E:/Data/IBIS_Data',
-        'BIOME-BGC site': 'E:/Data/Biome_BGC_Data'
+        'BIOME-BGC site': 'E:/Data/Biome_BGC_Data',
+        'LPJ': ''
     }
 };

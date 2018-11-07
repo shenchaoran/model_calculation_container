@@ -23,10 +23,9 @@ module.exports = {
         let ext = filename.substr(filename.lastIndexOf('.'));
         let oid
         let newName
-        if(fields['useNewName'] === 'false') {
+        if (fields['useNewName'] === 'false') {
             newName = filename
-        }
-        else {
+        } else {
             oid = new ObjectID()
             newName = oid + ext
         }
@@ -62,22 +61,22 @@ module.exports = {
                             })
                         })
                         .catch(e => {
-                            return reject(e.code === 'ENOENT'? 'file don\'t exist!': 'unpredictable error!');
+                            return reject(e.code === 'ENOENT' ? 'file don\'t exist!' : 'unpredictable error!');
                         });
                 });
             })
             .catch(Promise.reject);
     },
 
-    downloadByMSR: (msrId, eventId) => {
-        return recordsDB.findOne({_id: msrId})
-            .then(msr => {
-                let msCtrl = ModelFactory(msr)
-                return msCtrl.download(eventId)
-            })
-            .catch(e => {
-                console.error(e)
-                return Promise.reject(e)
-            })
+    downloadByMSR: async (msrId, eventId) => {
+        try {
+            let msr = await recordsDB.findOne({_id: msrId})
+            let msCtrl = await ModelFactory(msr)
+            return msCtrl.download(eventId)
+        }
+        catch (e){
+            console.error(e)
+            return Promise.reject(e)
+        }
     }
 }

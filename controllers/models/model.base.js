@@ -26,10 +26,10 @@ let RequestUtil = require('../../utils/request.utils')
  *          }]
  */
 module.exports = class ModelBase {
-    constructor(calcuTask) {
-        this.modelName = calcuTask.ms.MDL.meta.name
-        this.folder = path.join(setting.geo_models.path, this.modelName + '_' + calcuTask.ms._id)
-        this.exeName = calcuTask.ms.exeName
+    constructor(calcuTask, ms, std) {
+        this.modelName = ms.MDL.meta.name
+        this.folder = path.join(setting.geo_models.path, this.modelName + '_' + ms._id)
+        this.exeName = ms.exeName
         this.exePath = path.join(this.folder, this.exeName)
         this.cwd = path.join(this.folder)
 
@@ -40,13 +40,13 @@ module.exports = class ModelBase {
         // exe 运行时，没有值的配置项，如：git -h
         this.prefixIO = []
 
-        this.ms = calcuTask.ms
+        this.ms = ms
         this.msr = calcuTask
-        this.stdData = calcuTask.std
+        this.stdData = std
 
         this.constructorSucceed = true
         if (this.stdData && this.msr.IO.dataSrc === 'STD') {
-            this.stdPath = path.join(setting.STD_DATA[this.modelName], this.stdData._id)
+            this.stdPath = path.join(setting.STD_DATA[this.modelName], this.stdData._id.toString())
             this.logsFolder = path.join(this.stdPath, 'logs')
             this.recordsPath = path.join(this.stdPath, 'std_records.json')
             this.needUpdateSTDRecord = undefined

@@ -13,8 +13,8 @@ let calcuTaskDB = require('../../models/records.model')
 let ObjectID = require('mongodb').ObjectID
 
 module.exports = class BIOME_BGC_site extends CarbonModelBase {
-    constructor(calcuTask) {
-        super(calcuTask)
+    constructor(calcuTask, ms, std) {
+        super(calcuTask, ms, std)
         if (this.stdData) {
             let index = _
                 .chain(calcuTask.IO.std)

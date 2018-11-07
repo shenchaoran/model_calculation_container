@@ -1,5 +1,5 @@
-let Mongoose = require('./mongoose.base');
-let mongoose = require('mongoose');
+const Mongoose = require('./mongoose.base');
+const mongoose = require('mongoose');
 
 const schema = {
     host: String,
@@ -7,7 +7,7 @@ const schema = {
     prefix: String,
     auth: mongoose.Schema.Types.Mixed
 };
-let collectionName = 'Computing_Node';
-let nodeDB = new Mongoose(collectionName, schema);
+const collectionName = 'Computing_Node';
+const nodeDB = new Mongoose(collectionName, schema);
 
 module.exports = nodeDB;

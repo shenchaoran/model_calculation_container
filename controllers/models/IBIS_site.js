@@ -22,8 +22,8 @@ let ObjectID = require('mongodb').ObjectID
  * @extends {CarbonModelBase}
  */
 module.exports = class IBIS_site extends CarbonModelBase {
-    constructor(calcuTask) {
-        super(calcuTask)
+    constructor(calcuTask, ms, std) {
+        super(calcuTask, ms, std)
 
         if (this.stdData) {
             // 前端的 index 由 geoserver + openlayers 获取
