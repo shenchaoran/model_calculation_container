@@ -1,5 +1,5 @@
-let Promise = require('bluebird')
-let fs = Promise.promisifyAll(require('fs'))
+let Bluebird = require('bluebird')
+let fs = Bluebird.promisifyAll(require('fs'))
 let _ = require('lodash')
 let uuidv1 = require('uuid/v1')
 let child_process = require('child_process')
@@ -126,11 +126,11 @@ module.exports = class ModelBase {
         if (this.exePath) {
             this.initialization()
                 .then(() => this.invokeAndDaemon())
-            return Promise.resolve({
+            return Bluebird.resolve({
                 code: 200
             })
         } else {
-            return Promise.reject('the execuable progrom doesn\'t exist!')
+            return Bluebird.reject('the execuable progrom doesn\'t exist!')
         }
     }
 
@@ -271,11 +271,11 @@ module.exports = class ModelBase {
      *       ]
      */
     hadRunned() {
-        return Promise.resolve(undefined)
+        return Bluebird.resolve(undefined)
         if (this.msr.IO.dataSrc !== 'STD') {
-            return Promise.resolve(undefined)
+            return Bluebird.resolve(undefined)
         } else {
-            return new Promise((resolve, reject) => {
+            return new Bluebird((resolve, reject) => {
                 fs.readFileAsync(this.recordsPath, 'utf-8')
                     .then(buf => {
                         let str = buf.toString()
@@ -311,30 +311,35 @@ module.exports = class ModelBase {
         }
     }
 
-    download(eventId) {
-        return this.initialization()
-            .then(() => {
-                let fpath, fname
-                if (eventId === 'log') {
-                    if (this.stdData) {
+    async download(eventId) {
+        try {
+            await this.initialization()
+            let fpath, fname
+            if (eventId === 'log') {
+                if (this.stdData) {
 
-                    } else {
-
-                    }
-                    fpath = this.logPath
-                    fname = path.basename(fpath)
                 } else {
-                    fpath = this.ios[eventId]
-                    fname = this.ioFname[eventId]
+
                 }
-                if (fpath.indexOf('mtc43') !== -1) {
-                    fpath;
-                }
-                return Promise.resolve({
-                    stream: fs.createReadStream(fpath),
-                    fname: fname
-                })
-            })
-            .catch(Promise.reject)
+                fpath = this.logPath
+                fname = path.basename(fpath)
+            } 
+            else {
+                fpath = this.ios[eventId]
+                fname = this.ioFname[eventId]
+            }
+            if (fpath.indexOf('mtc43') !== -1) {
+                fpath;
+            }
+            let stream = fs.createReadStream(fpath)
+            return {
+                stream,
+                fname
+            }
+        }
+        catch {
+            console.log(e)
+            return Bluebird.reject(e)
+        }
     }
 }

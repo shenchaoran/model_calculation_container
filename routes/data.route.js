@@ -15,15 +15,14 @@ module.exports = router;
 router.route('/')
     .post((req, res, next) => {
         let form = new formidable.IncomingForm();
-		form.encoding = 'utf-8';
-		form.uploadDir = setting.geo_data.path;
-		form.keepExtensions = true;
-		form.maxFieldsSize = setting.geo_data.max_size;
-		form.parse(req, (err, fields, files) => {
-			if (err) {
-				return next(err);
-            }
-            else {
+        form.encoding = 'utf-8';
+        form.uploadDir = setting.geo_data.path;
+        form.keepExtensions = true;
+        form.maxFieldsSize = setting.geo_data.max_size;
+        form.parse(req, (err, fields, files) => {
+            if (err) {
+                return next(err);
+            } else {
                 DataCtrl.insert(fields, files)
                     .then(rst => {
                         return res.json(rst);
@@ -35,26 +34,33 @@ router.route('/')
 
 router.route('/download')
     .get((req, res, next) => {
-        if(req.query.msrId && req.query.eventId) {
-            DataCtrl.downloadByMSR(req.query.msrId, req.query.eventId)
-                .then(({stream, fname}) => {
-                    res.set({
-                        'Content-Type': 'file/*',
-                        'Content-Disposition':
-                            'attachment;filename=' +
-                            fname
-                    });
-                    return stream.pipe(res)
+        try {
+            if (req.query.msrId && req.query.eventId) {
+                DataCtrl.downloadByMSR(req.query.msrId, req.query.eventId)
+                    .then(({
+                        stream,
+                        fname
+                    }) => {
+                        res.set({
+                            'Content-Type': 'file/*',
+                            'Content-Disposition': 'attachment;filename=' +
+                                fname
+                        });
+                        stream.on('error', next)
+                        return stream.pipe(res)   
+                    })
+                    .catch(e => {
+                        return next(e)
+                    })
+            } else {
+                return res.json({
+                    code: 400,
+                    desc: 'invalid request query parameters'
                 })
-                .catch(e => {
-                    return next(e)
-                })
-        }
-        else {
-            return res.json({
-                code: 400,
-                desc: 'invalid request query parameters'
-            })
+            }
+        } catch (e) {
+            console.log(e)
+            return next(e)
         }
     })
 

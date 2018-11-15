@@ -28,16 +28,7 @@ module.exports = class BIOME_BGC_site extends CarbonModelBase {
             // TODO 
             //      spinup
             //      output 2 file
-            this.ioFname = {
-                // '--i': `${index}.ini`,
-                // '--m': `${index}.mtc43`,
-                // '--ri': `${index}.endpoint`,
-                // '--ro': `${index}.endpoint`,
-                // '--co2': `co2.txt`,
-                // '--epc': `shrub.epc`
-                '--do': `${index}.dayout.ascii`,
-                '--ao': `${index}.annout.ascii`
-            }
+            this.ioFname = {}
             this.ios = {
                 '--i': `./ini/${index}.ini`,
                 '--m': `./metdata/${index}.mtc43`,
@@ -45,7 +36,12 @@ module.exports = class BIOME_BGC_site extends CarbonModelBase {
                 '--ro': `./restart/${index}.endpoint`,
                 '--co2': `./co2/co2.txt`,
                 '--epc': `./epc/shrub.epc`,
-                '--o': `./outputs/${index}` // TODO 这里其实是一个前缀，下载文件时，要当成两个数据处理
+                '--o': `./outputs/${index}`,         // TODO 这里其实是一个前缀，下载文件时，要当成两个数据处理
+                '--do': `./outputs/${index}.daily.ascii`,
+                '--ao': `./outputs/${index}.annual.ascii`,
+                '--aao': `./outputs/${index}.annual-avg.ascii`,
+                '--mao': `./outputs/${index}.monthly-avg.ascii`,
+                '--so': `./outputs/${index}.summary.ascii`,
             }
             // 输出文件的后缀，
             // this.oSuffix = {
@@ -75,8 +71,6 @@ module.exports = class BIOME_BGC_site extends CarbonModelBase {
             _.map(this.msr.IO.inputs, input => {
                 input.fname = this.ioFname[input.id]
             })
-            this.ios['--do'] = path.join(this.ios['--o'] + '.dayout.ascii')
-            this.ios['--ao'] = path.join(this.ios['--o'] + '.annout.ascii')
         } else {
             for (let key of this.prefixIO) {
                 this.cmdLine += this.prefixIO[key] + ' '
