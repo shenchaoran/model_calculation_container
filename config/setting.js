@@ -11,7 +11,7 @@ module.exports = {
     fiddler_proxy: {
         host: 'localhost',
         port: 3122,
-        use: true
+        use: false
     },
     platform: (function () {
         let platform = 1;
@@ -21,12 +21,12 @@ module.exports = {
         return platform;
     })(),
     portal: {
-        host: '223.2.43.23',
-        port: '9999'
+        host: '222.192.7.74',
+        port: '80'
     },
     mongodb: {
         name: 'Comparison',
-        host: '223.2.43.23',
+        host: 'localhost',
         port: '27017'
     },
     geo_data: {
