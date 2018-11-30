@@ -1,6 +1,8 @@
 const IBIS_26b4 = require('./IBIS-2.6b4')
 const BIOME_BGC_site = require('./Biome-BGC-site')
 const IBIS_site = require('./IBIS-site')
+const BIOME_BGC_global = require('./Biome-BGC-global')
+const IBIS_global = require('./IBIS-global')
 const Bluebird = require('bluebird')
 const calcuTaskDB = require('../../models/records.model')
 const msDB = require('../../models/services.model')
@@ -16,6 +18,10 @@ module.exports = async function(calcuTask) {
                 return new IBIS_site(calcuTask, ms)
             case 'BIOME-BGC site':
                 return new BIOME_BGC_site(calcuTask, ms)
+            case 'BIOME-BGC global':
+                return new BIOME_BGC_global(calcuTask, ms)
+            case 'IBIS global':
+                return new IBIS_global(calcuTask, ms)
         }
     }
     catch(e) {

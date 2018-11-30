@@ -49,6 +49,8 @@ module.exports = {
         // 'IBIS_2.6b4': '/home/shencr/STD_DATA/IBIS_2.6b4',
         'IBIS site': 'E:/Data/IBIS_Data',
         'BIOME-BGC site': 'E:/Data/Biome_BGC_Data',
-        'LPJ': ''
+        'LPJ': '',
+        'IBIS global': '',              // 这个标准数据集存在上传文件夹中
+        'BIOME-BGC global': '',         // 这个标准数据集存在上传文件夹中
     }
 };

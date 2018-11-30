@@ -1,13 +1,12 @@
-const Mongoose = require('./mongoose.base');
+const OgmsSchemaStatics = require('./mongoose.base')
 const mongoose = require('mongoose');
 
-const schema = {
+const collectionName = 'Computing_Node';
+const schema = new mongoose.Schema({
     host: String,
     port: String,
     prefix: String,
     auth: mongoose.Schema.Types.Mixed
-};
-const collectionName = 'Computing_Node';
-const nodeDB = new Mongoose(collectionName, schema);
-
-module.exports = nodeDB;
+}, {collection: collectionName})
+Object.assign(schema.statics, OgmsSchemaStatics)
+module.exports = mongoose.model(collectionName, schema);

@@ -1,7 +1,8 @@
-const Mongoose = require('./mongoose.base');
+const OgmsSchemaStatics = require('./mongoose.base')
 const mongoose = require('mongoose');
 
-const schema = {
+const collectionName = 'Geo_Data';
+const schema = new mongoose.Schema({
     meta: {
         desc: String,
         path: String,
@@ -12,8 +13,6 @@ const schema = {
         userId: String
     },
     udxcfg: mongoose.Schema.Types.Mixed // maybe no use
-};
-const collectionName = 'Geo_Data';
-const geoDataDB = new Mongoose(collectionName, schema);
-
-module.exports = geoDataDB;
+}, {collection: collectionName})
+Object.assign(schema.statics, OgmsSchemaStatics)
+module.exports = mongoose.model(collectionName, schema);
