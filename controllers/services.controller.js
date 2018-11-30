@@ -18,13 +18,7 @@ module.exports = ServicesCtrl = function() {}
 ServicesCtrl.prototype.invoke = async (calcuTask) => {
     try {
         let modelInstance = await ModelFactory(calcuTask)
-        if(modelInstance.constructorSucceed) {
-            return modelInstance.invoke()
-                .catch(Blueblrd.reject)
-        }
-        else {
-            return Blueblrd.reject(new Error('invalid calculation task, please check the input configuration!'))
-        }
+        return modelInstance.invoke().catch(Blueblrd.reject)
     }
     catch(e) {
         console.log(e)

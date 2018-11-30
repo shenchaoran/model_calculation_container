@@ -1,4 +1,4 @@
-let CarbonModelBase = require('./CarbonModel.base')
+let CarbonModelBase = require('./Carbon-Model.base')
 let Promise = require('bluebird')
 let fs = Promise.promisifyAll(require('fs'))
 let _ = require('lodash')
@@ -22,37 +22,10 @@ let ObjectID = require('mongodb').ObjectID
  * @extends {CarbonModelBase}
  */
 module.exports = class IBIS_26b4 extends CarbonModelBase {
-    constructor(calcuTask, ms, std) {
-        super(calcuTask, ms, std)
-
-        if (this.stdData) {
-            this.exeName = undefined
-            this.exePath = undefined
+    constructor(calcuTask, ms) {
+        super(calcuTask, ms)
+        if (this.msr.IO.dataSrc === 'STD') {
             this.cwd = path.join(this.folder, 'debug')
-
-            // this.iFname = {
-            //     '--ini_infile_': 'ibis.infile',
-            //     '--diag_infile_': 'diag.infile',
-            //     '--cld_mon_': 'cld.mon.nc',
-            //     '--deltat_mon_': 'deltat.nc',
-            //     '--prec_mon_': 'prec.mon.nc',
-            //     '--rh_mon_': 'rh.mon.nc',
-            //     '--temp_mon_': 'temp.mon.nc',
-            //     '--trange_mon_': 'trange.mon.nc',
-            //     '--wetd_mon_': 'wetd.mon.nc',
-            //     '--wspd_mon_': 'wspd.mon.nc',
-            //     '--soita_sand_': 'soita.sand.nc',
-            //     '--soita_clay_': 'soita.clay.nc',
-            //     '--vegtype_': 'vegtype.nc',
-            //     '--surta_': 'surta.nc',
-            //     '--topo_': 'topo.nc',
-            //     '--deltat_': 'deltat.nc',
-            //     '--params_can_': 'params.can',
-            //     '--params_hyd_': 'params.hyd',
-            //     '--params_soi_': 'params.soi',
-            //     '--params_veg_': 'params.veg'
-            // }
-            // value 是相对于 this.stdPath 的路径
 
             this.ios = {
                 '--ini_infile_': './input/ibis.infile',
@@ -168,6 +141,7 @@ module.exports = class IBIS_26b4 extends CarbonModelBase {
      * reject: 
      *      err (unexist)
      */
+    // TODO std-data 的解析方式
     statEXE() {
         let compileParas = {}
         if (this.msr.IO.dataSrc === 'STD') {
@@ -183,7 +157,7 @@ module.exports = class IBIS_26b4 extends CarbonModelBase {
         }
 
         let versionPath = path.join(this.folder, 'versions.json')
-        return fs.readFileAsync(versionPath, 'utf-8')
+        return fs.readFileAsync(versionPath, 'utf8')
             .then(buf => {
                 let versions = JSON.parse(buf.toString())
                 let thisVersion = _.find(versions, compileParas)
@@ -203,7 +177,7 @@ module.exports = class IBIS_26b4 extends CarbonModelBase {
                     let makefilePath = path.join(this.folder, 'makefile')
                     return Promise.all([
                             // modify and save compar.h
-                            fs.readFileAsync(comparPath, 'utf-8')
+                            fs.readFileAsync(comparPath, 'utf8')
                             .then(buf => {
                                 let str = buf.toString()
                                 let comparFlag = 'c---modify_flag_of_auto_compile---'
@@ -221,7 +195,7 @@ module.exports = class IBIS_26b4 extends CarbonModelBase {
                                 return fs.writeFileAsync(comparPath, str)
                             }),
                             // modify and save makefile
-                            fs.readFileAsync(makefilePath, 'utf-8')
+                            fs.readFileAsync(makefilePath, 'utf8')
                             .then(buf => {
                                 let str = buf.toString()
                                 let newStr = str.replace(/(EXENAME\s*=\s*)((\w+|\d+|\.|\-|\_)*)/s, `$1${newVersion.exeName}`)
@@ -269,22 +243,18 @@ module.exports = class IBIS_26b4 extends CarbonModelBase {
      * reject:
      *      return err
      */
-    invoke() {
-        return this.initialization()
-            .then(this.statEXE())
-            .then(exePath => {
-                if (exePath) {
-                    this.invokeAndDaemon()
-                    return Promise.resolve({
-                        code: 200
-                    })
-                } else {
-                    return Promise.reject('the execuable progrom doesn\'t exist!')
-                }
-            })
-            .catch(e => {
-                console.log(e)
-                return Promise.reject(e)
-            })
+    async invoke() {
+        try {
+            let exePath = await this.statEXE()
+            if (exePath) {
+                this.invokeAndDaemon()
+                return Promise.resolve({ code: 200 })
+            } else {
+                return Promise.reject('the execuable progrom doesn\'t exist!')
+            }
+        } catch (e) {
+            console.log(e)
+            return Promise.reject(e)
+        }
     }
 }

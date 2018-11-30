@@ -70,7 +70,7 @@ interval(10).pipe(
 
 // RequestUtil.getByServer('http://localhost:9999/index')
 
-// fs.readFileAsync('asdf', 'utf-8')
+// fs.readFileAsync('asdf', 'utf8')
 //     .then(buf => {
 //         buf
 //     })

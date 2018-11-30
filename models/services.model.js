@@ -5,7 +5,6 @@ const collectionName = 'Model_Service'
 const schema = {
     auth: mongoose.Schema.Types.Mixed,
     MDL: mongoose.Schema.Types.Mixed,
-    stdIds: mongoose.Schema.Types.Mixed,
     nodeId: String,
     topic: String,
     exeName: String

@@ -26,7 +26,7 @@ let RequestUtil = require('../../utils/request.utils')
  *          }]
  */
 module.exports = class ModelBase {
-    constructor(calcuTask, ms, std) {
+    constructor(calcuTask, ms) {
         this.modelName = ms.MDL.meta.name
         this.folder = path.join(setting.geo_models.path, this.modelName + '_' + ms._id)
         this.exeName = ms.exeName
@@ -39,33 +39,20 @@ module.exports = class ModelBase {
         this.ioFname = {}
         // exe 运行时，没有值的配置项，如：git -h
         this.prefixIO = []
+        this.cmdLine = ''
 
         this.ms = ms
         this.msr = calcuTask
-        this.stdData = std
-
-        this.constructorSucceed = true
-        if (this.stdData && this.msr.IO.dataSrc === 'STD') {
-            this.stdPath = path.join(setting.STD_DATA[this.modelName], this.stdData._id.toString())
-            this.logsFolder = path.join(this.stdPath, 'logs')
-            this.recordsPath = path.join(this.stdPath, 'std_records.json')
-            this.needUpdateSTDRecord = undefined
-        } else {
-            this.needUpdateSTDRecord = false
-        }
-        this.cmdLine = ''
     }
 
     /**
-     * 调用 public 函数前应该先调次函数
+     * 初始化: cmdLine, logPath, recordsPath, ios, ioFname
+     * 
      * 1. 完善构造 msr 时 IO 里 fname 或 value 的不完整，并更新到数据库中
      * 2. 求 cmdLine 和 ios
      */
     initialization() {
-        for (let key in this.ios) {
-            this.ioFname[key] = path.basename(this.ios[key])
-        }
-        if (this.stdData && this.msr.IO.dataSrc === 'STD') {
+        if (this.msr.IO.dataSrc === 'STD') {
             for (let v of this.prefixIO) {
                 this.cmdLine += `${v} `
             }
@@ -79,18 +66,20 @@ module.exports = class ModelBase {
                 input.fname = this.ioFname[input.id]
             })
         } else {
+            for (let key of this.prefixIO) {
+                this.cmdLine += this.prefixIO[key] + ' '
+            }
             // TODO 对输入输出文件的处理
             for (let key in this.msr.IO) {
-                if (key !== 'inputs' || key !== 'outputs' || key !== 'parameters')
+                if (key !== 'inputs' && key !== 'outputs' && key !== 'parameters')
                     return;
                 _.map(this.msr.IO[type], event => {
                     if (type === 'outputs') {
                         event.value = new ObjectID().toHexString();
-                    }
-                    if (type === 'parameters') {
+                    } else if (type === 'parameters') {
                         if (event.value)
                             this.cmdLine += `${event.id}=${event.value}`
-                    } else if (event.value && event.value !== '') {
+                    } else if (event.value) {
                         let fpath = path.join(setting.geo_data.path, event.value + event.ext);
                         this.ios[event.id] = fpath
                         this.ioFname[event.id] = event.fname
@@ -106,14 +95,6 @@ module.exports = class ModelBase {
             let reg = new RegExp(`(${output.ext})+$`)
             output.fname = output.fname.replace(reg, output.ext)
         })
-        return calcuTaskDB.update({
-            _id: this.msr._id
-        }, {
-            $set: {
-                'IO.inputs': this.msr.IO.inputs,
-                'IO.outputs': this.msr.IO.outputs
-            }
-        })
     }
 
     /**
@@ -122,15 +103,24 @@ module.exports = class ModelBase {
      * reject:
      *      return err
      */
-    invoke() {
-        if (this.exePath) {
-            this.initialization()
-                .then(() => this.invokeAndDaemon())
-            return Bluebird.resolve({
-                code: 200
-            })
-        } else {
-            return Bluebird.reject('the execuable progrom doesn\'t exist!')
+    async invoke() {
+        try {
+            if (this.exePath) {
+                await calcuTaskDB.update({
+                    _id: this.msr._id
+                }, {
+                    $set: {
+                        'IO.inputs': this.msr.IO.inputs,
+                        'IO.outputs': this.msr.IO.outputs
+                    }
+                })
+                this.invokeAndDaemon();
+                return { code: 200 }
+            } else {
+                return Bluebird.reject('the execuable progrom doesn\'t exist!')
+            }
+        } catch (e) {
+            return Bluebird.reject(e)
         }
     }
 
@@ -138,123 +128,110 @@ module.exports = class ModelBase {
      * private
      * 调用模型，同时根据 stdout 监听模型运行的进度，将进度保存到 DB 中
      */
-    invokeAndDaemon() {
-        this.hadRunned()
-            .then(msrId => {
-                if (msrId) {
-                    calcuTaskDB.findOne({
-                            _id: msrId
-                        })
-                        .then(doc => {
-                            return calcuTaskDB.update({
-                                _id: this.msr._id
-                            }, {
-                                $set: {
-                                    IO: doc.IO,
-                                    state: doc.state,
-                                    progress: doc.progress
-                                }
-                            })
-                        })
-                        .catch(e => {
-                            console.log(e)
-                        })
-                } else {
-                    let group = _.filter(this.cmdLine.split(/\s+/), str => str.trim() !== '');
-                    // console.log(this.cmdLine);
-                    let updateProgress = (status) => {
-                        this.msr.state = status
-                        switch (this.msr.state) {
-                            case 'FINISHED_SUCCEED':
-                                this.msr.progress = 100
-                                break
-                            case 'RUNNING':
-                                this.msr.progress = this.msr.progress > 100 ? 100 : this.msr.progress
-                                break
-                            case 'FINISHED_FAILED':
-                                break
-                        }
-
-                        calcuTaskDB.update({
-                            _id: this.msr._id
-                        }, {
-                            $set: {
-                                state: this.msr.state,
-                                progress: this.msr.progress
-                            }
-                        })
+    async invokeAndDaemon() {
+        try {
+            let msrId = await this.hadRunned()
+            if (msrId) {
+                let doc = await calcuTaskDB.findOne({
+                    _id: msrId
+                })
+                return calcuTaskDB.update({
+                    _id: this.msr._id
+                }, {
+                    $set: {
+                        IO: doc.IO,
+                        state: doc.state,
+                        progress: doc.progress
+                    }
+                })
+            } else {
+                let group = _.filter(this.cmdLine.split(/\s+/), str => str.trim() !== '');
+                // console.log(this.cmdLine);
+                let updateProgress = (status) => {
+                    this.msr.state = status
+                    switch (this.msr.state) {
+                        case 'FINISHED_SUCCEED':
+                            this.msr.progress = 100
+                            break
+                        case 'RUNNING':
+                            this.msr.progress = this.msr.progress > 100 ? 100 : this.msr.progress
+                            break
+                        case 'FINISHED_FAILED':
+                            break
                     }
 
-                    // IBIS_26b4 运行是如果数据是使用 ～ 来表示路径时就会出错，而是用/home/shencr不会出错
-                    const cp = spawn(`${this.exePath}`, group);
-                    console.info(this.exePath, '\n', this.cmdLine)
-
-                    let ws = fs.createWriteStream(this.logPath)
-                    cp.stdout.pipe(ws)
-                    cp.stderr.pipe(ws)
-
-                    if (this.needUpdateSTDRecord) {
-                        fs.readFileAsync(this.recordsPath, 'utf-8')
-                            .then(buf => {
-                                let str = buf.toString()
-                                let newStr
-                                try {
-                                    if (_.trim(str) === '') {
-                                        str = '[]'
-                                    }
-                                    let records = JSON.parse(str)
-                                    records.push({
-                                        msrId: this.msr._id,
-                                        parameters: this.msr.IO.parameters,
-                                        std: this.msr.IO.std
-                                    })
-                                    newStr = JSON.stringify(records)
-                                } catch (e) {
-                                    newStr = str
-                                }
-                                return fs.writeFileAsync(this.recordsPath, newStr)
-                            })
-                            .catch(e => {
-                                if (e) {
-                                    console.log(e)
-                                }
-                            })
-                    }
-
-                    cp.stdout.on('data', data => {
-                        let str = data.toString();
-                        if (str.indexOf(setting.invoke_failed_tag) !== -1) {
-                            updateProgress('FINISHED_FAILED');
-                        } else {
-                            // 更新 process
-                            let group = str.match(setting.progressReg);
-                            let progress = group ? group[group.length - 1] : undefined;
-                            if (progress) {
-                                console.log('Progress: ', progress);
-                                this.msr.progress = parseFloat(progress)
-                                updateProgress('RUNNING');
-                            }
+                    calcuTaskDB.update({
+                        _id: this.msr._id
+                    }, {
+                        $set: {
+                            state: this.msr.state,
+                            progress: this.msr.progress
                         }
-                    });
-                    cp.stderr.on('data', data => {
-                        // 
-                        console.log(data.toString());
-                        // 这里不算崩掉
-                        // updateRecord('failed');
-                    });
-                    cp.on('close', code => {
-                        console.log(`********${this.modelName} finished code: ${code}`, '\t', code === 0 ? 'succeed' : 'failed');
-                        if (code === 0) {
-                            updateProgress('FINISHED_SUCCEED');
-                        } else {
-                            updateProgress('FINISHED_FAILED');
-                        }
-                    });
+                    })
                 }
-            })
-            .catch(e => {
-                console.log(e)
-            })
+
+                // IBIS_26b4 运行是如果数据是使用 ～ 来表示路径时就会出错，而是用/home/shencr不会出错
+                const cp = spawn(`${this.exePath}`, group);
+                console.info(this.exePath, '\n', this.cmdLine)
+
+                let ws = fs.createWriteStream(this.logPath)
+                cp.stdout.pipe(ws)
+                cp.stderr.pipe(ws)
+
+                if (this.needUpdateSTDRecord) {
+                    let buf = await fs.readFileAsync(this.recordsPath, 'utf8')
+                    let str = buf.toString()
+                    let newStr
+                    try {
+                        if (_.trim(str) === '') {
+                            str = '[]'
+                        }
+                        let records = JSON.parse(str)
+                        records.push({
+                            msrId: this.msr._id,
+                            parameters: this.msr.IO.parameters,
+                            std: this.msr.IO.std
+                        })
+                        newStr = JSON.stringify(records)
+                    } catch (e) {
+                        newStr = str
+                    }
+                    fs.writeFileAsync(this.recordsPath, newStr)
+                }
+
+                cp.stdout.on('data', data => {
+                    let str = data.toString();
+                    if (str.indexOf(setting.invoke_failed_tag) !== -1) {
+                        updateProgress('FINISHED_FAILED');
+                    } else {
+                        // 更新 process
+                        let group = str.match(setting.progressReg);
+                        let progress = group ? group[group.length - 1] : undefined;
+                        if (progress) {
+                            console.log('Progress: ', progress);
+                            this.msr.progress = parseFloat(progress)
+                            updateProgress('RUNNING');
+                        }
+                    }
+                });
+                cp.stderr.on('data', data => {
+                    // 
+                    console.log(data.toString());
+                    // 这里不算崩掉
+                    // updateRecord('failed');
+                });
+                cp.on('close', code => {
+                    console.log(`********${this.modelName} finished code: ${code}`, '\t', code === 0 ? 'succeed' : 'failed');
+                    if (code === 0) {
+                        updateProgress('FINISHED_SUCCEED');
+                    } else {
+                        updateProgress('FINISHED_FAILED');
+                    }
+                });
+            }
+        } catch (e) {
+            console.log(e)
+        }
     }
 
     /**
@@ -270,74 +247,61 @@ module.exports = class ModelBase {
      *          }
      *       ]
      */
-    hadRunned() {
-        return Bluebird.resolve(undefined)
-        if (this.msr.IO.dataSrc !== 'STD') {
-            return Bluebird.resolve(undefined)
-        } else {
-            return new Bluebird((resolve, reject) => {
-                fs.readFileAsync(this.recordsPath, 'utf-8')
-                    .then(buf => {
-                        let str = buf.toString()
-                        if (_.trim(str) === '')
-                            str = '[]'
-                        let records = JSON.parse(str)
-                        let record = _.find(records, {
-                            parameters: this.msr.IO.parameters,
-                            std: this.msr.IO.std
-                        })
-                        if (record) {
-                            return resolve(record.msrId)
-                        } else {
-                            this.needUpdateSTDRecord = true
-                            return resolve(undefined)
-                        }
+    async hadRunned() {
+        try {
+            // return undefined
+
+            if (this.msr.IO.dataSrc !== 'STD') {
+                return undefined;
+            } else {
+                try {
+                    let buf = await fs.readFileAsync(this.recordsPath, 'utf8')
+                    let str = buf.toString()
+                    if (_.trim(str) === '')
+                        str = '[]'
+                    let records = JSON.parse(str)
+                    let record = _.find(records, {
+                        parameters: this.msr.IO.parameters,
+                        std: this.msr.IO.std
                     })
-                    .catch(e => {
+                    if (record) {
+                        return record.msrId
+                    } else {
                         this.needUpdateSTDRecord = true
-                        if (e.code === 'ENOENT') {
-                            return fs.writeFileAsync(this.recordsPath, '[]')
-                                .then(() => {
-                                    return resolve(undefined)
-                                })
-                                .catch(e => {
-                                    return resolve(undefined)
-                                })
-                        } else {
-                            return resolve(undefined)
-                        }
-                    })
-            })
+                        return undefined
+                    }
+                } catch (e) {
+                    this.needUpdateSTDRecord = true
+                    if (e.code === 'ENOENT') {
+                        await fs.writeFileAsync(this.recordsPath, '[]')
+                        return undefined;
+                    } else {
+                        return undefined;
+                    }
+                }
+            }
+
+        } catch (e) {
+            return Bluebird.reject(e)
         }
     }
 
     async download(eventId) {
         try {
-            await this.initialization()
             let fpath, fname
             if (eventId === 'log') {
-                if (this.stdData) {
-
-                } else {
-
-                }
                 fpath = this.logPath
                 fname = path.basename(fpath)
-            } 
-            else {
+            } else {
                 fpath = this.ios[eventId]
                 fname = this.ioFname[eventId]
-            }
-            if (fpath.indexOf('mtc43') !== -1) {
-                fpath;
             }
             let stream = fs.createReadStream(fpath)
             return {
                 stream,
                 fname
             }
-        }
-        catch {
+        } catch {
             console.log(e)
             return Bluebird.reject(e)
         }
