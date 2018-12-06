@@ -7,6 +7,7 @@ IPCtrl.getLocalIP = function () {
     let interfaces = os.networkInterfaces()
     let ipv4
     for(let key in interfaces) {
+        // TODO virtuaBox host only network
         if(ipv4) 
             break
         for(let item of interfaces[key]) {

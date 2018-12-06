@@ -147,7 +147,7 @@ module.exports = class ModelBase {
             } else {
                 let group = _.filter(this.cmdLine.split(/\s+/), str => str.trim() !== '');
                 // console.log(this.cmdLine);
-                let updateProgress = (status) => {
+                let updateProgress = async status => {
                     this.msr.state = status
                     switch (this.msr.state) {
                         case 'FINISHED_SUCCEED':
@@ -160,7 +160,7 @@ module.exports = class ModelBase {
                             break
                     }
 
-                    calcuTaskDB.update({
+                    await calcuTaskDB.update({
                         _id: this.msr._id
                     }, {
                         $set: {
@@ -249,7 +249,7 @@ module.exports = class ModelBase {
      */
     async hadRunned() {
         try {
-            // return undefined
+            return undefined
 
             if (this.msr.IO.dataSrc !== 'STD') {
                 return undefined;

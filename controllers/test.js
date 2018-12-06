@@ -4,16 +4,19 @@ let fs = Promise.promisifyAll(require('fs'))
 let RequestUtil = require('../utils/request.utils')
 let { Observable, interval, from, of, forkJoin } = require('rxjs')
 let { startWith, map, flatMap, switchMap, filter, mergeMap, take, bufferCount } = require('rxjs/operators')
+let IPCtrl = require('../utils/ip.utils')
 
-interval(10).pipe(
-    take(5),
-    map(of),
-    bufferCount(5),
-    flatMap(v => forkJoin(...v))
-)
-    .subscribe(v => {
-        console.log(v)
-    })
+console.log(IPCtrl.getLocalIP());
+
+// interval(10).pipe(
+//     take(5),
+//     map(of),
+//     bufferCount(5),
+//     flatMap(v => forkJoin(...v))
+// )
+//     .subscribe(v => {
+//         console.log(v)
+//     })
 
 
 
