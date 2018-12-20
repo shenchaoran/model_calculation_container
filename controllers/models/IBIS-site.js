@@ -41,6 +41,9 @@ module.exports = class IBIS_site extends CarbonModelBase {
                 for (let key in this.ios) {
                     this.ioFname[key] = path.basename(this.ios[key])
                 }
+                _.map(this.msr.IO.outputs, output => {
+                    output.fname = this.ioFname[output.id]
+                })
             }
         } else {
             this.needUpdateSTDRecord = false

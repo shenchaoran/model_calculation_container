@@ -8,7 +8,8 @@ module.exports = () => {
     console.log('******** local IP: ' + global.ipv4)
     return nodeDB.update({ 'auth.nodeName': setting.nodeName }, {
         $set: {
-            host: global.ipv4,
+            // host: global.ipv4,
+            host: setting.host,
             port: setting.port,
             API_prefix: setting.API_prefix
         }

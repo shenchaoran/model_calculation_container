@@ -68,6 +68,9 @@ module.exports = class BIOME_BGC_site extends CarbonModelBase {
             _.map(this.msr.IO.inputs, input => {
                 input.fname = this.ioFname[input.id]
             })
+            _.map(this.msr.IO.outputs, output => {
+                output.fname = this.ioFname[output.id]
+            })
         }
         else {
             for (let key of this.prefixIO) {

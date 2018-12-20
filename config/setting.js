@@ -4,6 +4,7 @@ let path = require('path')
 
 module.exports = {
     nodeName: "scr-windows",
+    host: '223.2.35.73',
     port: 6868,
     auth: false,
     jwt_secret: 'asdl;fjl;asdjflasjkfsl;jfdl;asdfjl;asdjkflsda',
