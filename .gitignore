@@ -4,3 +4,5 @@ node_modules
 /resources/geo-models/IBIS site_5a1122b1a5559025a032b39c/bat
 config/setting.js
 test/writeSteam.test.txt
+resources/geo-models/IBIS site_5a1122b1a5559025a032b39c/IBIS.exe
+resources/geo-models/Biome-BGC site_5a1122b1a5559025a032b39d/Biome_BGC.exe
