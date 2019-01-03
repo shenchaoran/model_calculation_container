@@ -16,9 +16,9 @@ module.exports = async function(calcuTask) {
                 return new IBIS_26b4(calcuTask, ms)
             case 'IBIS site':
                 return new IBIS_site(calcuTask, ms)
-            case 'BIOME-BGC site':
+            case 'Biome-BGC site':
                 return new BIOME_BGC_site(calcuTask, ms)
-            case 'BIOME-BGC global':
+            case 'Biome-BGC global':
                 return new BIOME_BGC_global(calcuTask, ms)
             case 'IBIS global':
                 return new IBIS_global(calcuTask, ms)

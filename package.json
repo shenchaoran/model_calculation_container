@@ -21,6 +21,7 @@
         "lodash": "^4.17.10",
         "mongoose": "^5.3.11",
         "morgan": "~1.9.0",
+        "natives": "^1.1.6",
         "request": "^2.87.0",
         "request-promise": "^4.2.2",
         "rxjs": "^6.2.2",

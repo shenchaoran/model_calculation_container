@@ -28,7 +28,7 @@ let RequestUtil = require('../../utils/request.utils')
 module.exports = class ModelBase {
     constructor(calcuTask, ms) {
         this.modelName = ms.MDL.meta.name
-        this.folder = path.join(setting.geo_models.path, this.modelName + '_' + ms._id)
+        this.folder = path.join(setting.geo_models.path, this.modelName.replace(/\s/g, '-') + '_' + ms._id)
         this.exeName = ms.exeName
         this.exePath = path.join(this.folder, this.exeName)
         this.cwd = path.join(this.folder)
@@ -301,7 +301,8 @@ module.exports = class ModelBase {
                 stream,
                 fname
             }
-        } catch {
+        } 
+        catch(e) {
             console.log(e)
             return Bluebird.reject(e)
         }

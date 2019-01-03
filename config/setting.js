@@ -4,7 +4,7 @@ let path = require('path')
 
 module.exports = {
     nodeName: "scr-windows",
-    host: '223.2.35.73',
+    host: '172.21.213.253',
     port: 6868,
     auth: false,
     jwt_secret: 'asdl;fjl;asdjflasjkfsl;jfdl;asdfjl;asdjkflsda',
@@ -21,13 +21,9 @@ module.exports = {
         }
         return platform;
     })(),
-    portal: {
-        host: '222.192.7.74',
-        port: '80'
-    },
     mongodb: {
         name: 'Comparison',
-        host: 'localhost',
+        host: '223.2.35.73',
         port: '27017'
     },
     geo_data: {
@@ -48,10 +44,10 @@ module.exports = {
     // 换部署服务器时，这里也要更新成对应的文件路径
     STD_DATA: {
         // 'IBIS_2.6b4': '/home/shencr/STD_DATA/IBIS_2.6b4',
-        'IBIS site': 'E:/Data/IBIS_Data',
-        'BIOME-BGC site': 'E:/Data/Biome_BGC_Data',
+        'IBIS site': '/home/scr/Data/IBIS_Data',
+        'Biome-BGC site': '/home/scr/Data/Biome_BGC_Data',
         'LPJ': '',
         'IBIS global': '',              // 这个标准数据集存在上传文件夹中
-        'BIOME-BGC global': '',         // 这个标准数据集存在上传文件夹中
+        'Biome-BGC global': '',         // 这个标准数据集存在上传文件夹中
     }
 };

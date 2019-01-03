@@ -34,9 +34,11 @@ module.exports = class IBIS_site extends CarbonModelBase {
                 this.index = index
                 this.logPath = path.join(this.logsFolder, `${index}_${this.msr._id}.log`)
                 this.ios = {
-                    '-i': './input/csv/' + index + '_proced.csv',
-                    '-o': './output/' + index + '_IBIS_output.txt',
-                    '-s': './input/txt/' + index + '.txt'
+                    '--met': './inputs/csv/' + index + '_proced.csv',
+                    '--site': './inputs/txt/' + index + '.txt',
+                    '--do': './outputs/' + index + '.daily.txt',
+                    '--ao': './outputs/' + index + '.annual.txt',
+                    '--stat': './outputs/' + index + '.state.txt',
                 }
                 for (let key in this.ios) {
                     this.ioFname[key] = path.basename(this.ios[key])

@@ -23,23 +23,20 @@ module.exports = class BIOME_BGC_site extends CarbonModelBase {
             this.recordsPath = path.join(this.stdPath, 'std_records.json')
             if (index) {
                 this.logPath = path.join(this.logsFolder, `${index}_${this.msr._id}.log`)
-                this.prefixIO = ['-a']
-                // TODO 
-                //      spinup
-                //      output 2 file
+                this.prefixIO = [this.exePath, '-a']
+                let epc = 'shrub';
+                let ini = fs.readFileSync(path.join(this.stdPath, `ini/${index}.ini`), 'utf8')
+                let rst = /epc\/(.*)\.epc/.exec(ini)
+                if(rst)
+                    epc = rst[1]
                 this.ios = {
                     '--i': `./ini/${index}.ini`,
                     '--m': `./metdata/${index}.mtc43`,
-                    '--ri': `./restart/${index}.endpoint`,
-                    '--ro': `./restart/${index}.endpoint`,
                     '--co2': `./co2/co2.txt`,
-                    '--epc': `./epc/shrub.epc`,
+                    '--epc': `./epc/${epc}.epc`,
                     '--o': `./outputs/${index}`,                    // 这里其实是一个前缀，下载文件时，要当成两个数据处理
                     '--do': `./outputs/${index}.daily.ascii`,
-                    '--ao': `./outputs/${index}.annual.ascii`,
-                    '--aao': `./outputs/${index}.annual-avg.ascii`,
-                    '--mao': `./outputs/${index}.monthly-avg.ascii`,
-                    '--so': `./outputs/${index}.summary.ascii`,
+                    '--ao': `./outputs/${index}.annual-avg.ascii`,
                 }
                 for (let key in this.ios) {
                     this.ioFname[key] = path.basename(this.ios[key])
@@ -110,5 +107,6 @@ module.exports = class BIOME_BGC_site extends CarbonModelBase {
             let reg = new RegExp(`(${output.ext})+$`)
             output.fname = output.fname.replace(reg, output.ext)
         })
+        this.exePath = 'node';
     }
 }
