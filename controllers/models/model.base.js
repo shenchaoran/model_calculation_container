@@ -130,14 +130,10 @@ module.exports = class ModelBase {
      */
     async invokeAndDaemon() {
         try {
-            let msrId = await this.hadRunned()
-            if (msrId) {
-                let doc = await calcuTaskDB.findOne({
-                    _id: msrId
-                })
-                return calcuTaskDB.update({
-                    _id: this.msr._id
-                }, {
+            let hadRunned = await this.hadRunned()
+            if (hadRunned) {
+                let doc = await calcuTaskDB.findOne({ _id: msrId })
+                return calcuTaskDB.update({ _id: this.msr._id }, {
                     $set: {
                         IO: doc.IO,
                         state: doc.state,
@@ -237,50 +233,19 @@ module.exports = class ModelBase {
     /**
      * private
      * return msrId/undefined
-     *      
-     * 使用标准数据集时，根据参数判断是否运行过
-     *      运行记录存在标准数据集下的 std_records.json 中
-     *       [
-     *          {
-     *              msrId,
-     *              parameters: []
-     *          }
-     *       ]
      */
     async hadRunned() {
         try {
-            return undefined
-
             if (this.msr.IO.dataSrc !== 'STD') {
                 return undefined;
             } else {
                 try {
-                    let buf = await fs.readFileAsync(this.recordsPath, 'utf8')
-                    let str = buf.toString()
-                    if (_.trim(str) === '')
-                        str = '[]'
-                    let records = JSON.parse(str)
-                    let record = _.find(records, {
-                        parameters: this.msr.IO.parameters,
-                        std: this.msr.IO.std
-                    })
-                    if (record) {
-                        return record.msrId
-                    } else {
-                        this.needUpdateSTDRecord = true
-                        return undefined
-                    }
+                    await fs.accessAsync(this.ios[this.hadRunnedOutputKey], fs.constants.F_OK)
+                    return true;
                 } catch (e) {
-                    this.needUpdateSTDRecord = true
-                    if (e.code === 'ENOENT') {
-                        await fs.writeFileAsync(this.recordsPath, '[]')
-                        return undefined;
-                    } else {
-                        return undefined;
-                    }
+                    return false;
                 }
             }
-
         } catch (e) {
             return Bluebird.reject(e)
         }

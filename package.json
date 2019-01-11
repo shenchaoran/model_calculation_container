@@ -3,8 +3,11 @@
     "version": "0.0.0",
     "private": true,
     "scripts": {
-        "start": "node app.js",
-        "debug": "nodemon  --inspect=0.0.0.0:24688  app.js"
+        "start": "npm run pm2-release",
+        "debug": "npm run pm2-debug",
+        "nodemon": "nodemon  --inspect=0.0.0.0:24688  app.js",
+        "pm2-debug": "pm2 start ecosystem.config.js --only CMIP-calculation-debug",
+        "pm2-release": "pm2 start ecosystem.config.js --only CMIP-calculation-release"
     },
     "dependencies": {
         "bluebird": "^3.5.1",

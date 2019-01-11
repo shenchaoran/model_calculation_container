@@ -28,14 +28,15 @@ module.exports = class IBIS_site extends CarbonModelBase {
             let index = _.find(calcuTask.IO.std, std => std.id === '--index').value
             let stdId = _.find(calcuTask.IO.std, std => std.id === '--dataset').value
             this.stdPath = path.join(setting.STD_DATA[this.modelName], stdId)
+            this.hadRunnedOutputKey = '--stat';
             this.logsFolder = path.join(this.stdPath, 'logs')
             this.recordsPath = path.join(this.stdPath, 'std_records.json')
             if (index) {
                 this.index = index
                 this.logPath = path.join(this.logsFolder, `${index}_${this.msr._id}.log`)
                 this.ios = {
-                    '--met': './inputs/csv/' + index + '_proced.csv',
-                    '--site': './inputs/txt/' + index + '.txt',
+                    '--met': './met/' + index + '_proced.csv',
+                    '--site': './site/' + index + '.txt',
                     '--do': './outputs/' + index + '.daily.txt',
                     '--ao': './outputs/' + index + '.annual.txt',
                     '--stat': './outputs/' + index + '.state.txt',
@@ -48,7 +49,6 @@ module.exports = class IBIS_site extends CarbonModelBase {
                 })
             }
         } else {
-            this.needUpdateSTDRecord = false
             this.logsFolder = setting.geo_data.path
             this.logPath = path.join(this.logsFolder, `${this.msr._id}.log`)
         }

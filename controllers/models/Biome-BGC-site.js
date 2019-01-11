@@ -21,6 +21,7 @@ module.exports = class BIOME_BGC_site extends CarbonModelBase {
             this.stdPath = path.join(setting.STD_DATA[this.modelName], stdId)
             this.logsFolder = path.join(this.stdPath, 'logs')
             this.recordsPath = path.join(this.stdPath, 'std_records.json')
+            this.hadRunnedOutputKey = '--do';
             if (index) {
                 this.logPath = path.join(this.logsFolder, `${index}_${this.msr._id}.log`)
                 this.prefixIO = [this.exePath, '-a']
@@ -31,7 +32,7 @@ module.exports = class BIOME_BGC_site extends CarbonModelBase {
                     epc = rst[1]
                 this.ios = {
                     '--i': `./ini/${index}.ini`,
-                    '--m': `./metdata/${index}.mtc43`,
+                    '--m': `./met/${index}.mtc43`,
                     '--co2': `./co2/co2.txt`,
                     '--epc': `./epc/${epc}.epc`,
                     '--o': `./outputs/${index}`,                    // 这里其实是一个前缀，下载文件时，要当成两个数据处理
