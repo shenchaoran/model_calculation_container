@@ -3,8 +3,11 @@
     "version": "0.0.0",
     "private": true,
     "scripts": {
-        "start": "node app.js",
-        "debug": "nodemon  --inspect=0.0.0.0:24688  app.js"
+        "start": "npm run pm2-release",
+        "debug": "npm run pm2-debug",
+        "nodemon": "nodemon  --inspect=0.0.0.0:24688  app.js",
+        "pm2-debug": "pm2 start ecosystem.config.js --only CMIP-calculation-debug",
+        "pm2-release": "pm2 start ecosystem.config.js --only CMIP-calculation-release"
     },
     "dependencies": {
         "bluebird": "^3.5.1",
@@ -19,9 +22,9 @@
         "jade": "~1.11.0",
         "jwt-simple": "^0.5.1",
         "lodash": "^4.17.10",
-        "mongodb": "^3.1.1",
-        "mongoose": "^5.0.16",
+        "mongoose": "^5.3.11",
         "morgan": "~1.9.0",
+        "natives": "^1.1.6",
         "request": "^2.87.0",
         "request-promise": "^4.2.2",
         "rxjs": "^6.2.2",

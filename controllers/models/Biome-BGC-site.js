@@ -1,4 +1,4 @@
-let CarbonModelBase = require('./CarbonModel.base')
+let CarbonModelBase = require('./Carbon-Model.base')
 let Promise = require('bluebird')
 let fs = Promise.promisifyAll(require('fs'))
 let _ = require('lodash')
@@ -13,52 +13,47 @@ let calcuTaskDB = require('../../models/records.model')
 let ObjectID = require('mongodb').ObjectID
 
 module.exports = class BIOME_BGC_site extends CarbonModelBase {
-    constructor(calcuTask, ms, std) {
-        super(calcuTask, ms, std)
-        if (this.stdData) {
-            let index = _
-                .chain(calcuTask.IO.std)
-                .find(item => item.id === '--index')
-                .get('value')
-                .value()
-            if (!index)
-                this.constructorSucceed = false
-            this.logPath = path.join(this.logsFolder, `${index}_${this.msr._id}.log`)
-            this.prefixIO = ['-a']
-            // TODO 
-            //      spinup
-            //      output 2 file
-            this.ioFname = {}
-            this.ios = {
-                '--i': `./ini/${index}.ini`,
-                '--m': `./metdata/${index}.mtc43`,
-                '--ri': `./restart/${index}.endpoint`,
-                '--ro': `./restart/${index}.endpoint`,
-                '--co2': `./co2/co2.txt`,
-                '--epc': `./epc/shrub.epc`,
-                '--o': `./outputs/${index}`,         // TODO 这里其实是一个前缀，下载文件时，要当成两个数据处理
-                '--do': `./outputs/${index}.daily.ascii`,
-                '--ao': `./outputs/${index}.annual.ascii`,
-                '--aao': `./outputs/${index}.annual-avg.ascii`,
-                '--mao': `./outputs/${index}.monthly-avg.ascii`,
-                '--so': `./outputs/${index}.summary.ascii`,
+    constructor(calcuTask, ms) {
+        super(calcuTask, ms)
+        if(this.msr.IO.dataSrc === 'STD') {
+            let index = _.find(calcuTask.IO.std, std => std.id === '--index').value
+            let stdId = _.find(calcuTask.IO.std, std => std.id === '--dataset').value
+            this.stdPath = path.join(setting.STD_DATA[this.modelName], stdId)
+            this.logsFolder = path.join(this.stdPath, 'logs')
+            this.recordsPath = path.join(this.stdPath, 'std_records.json')
+            this.hadRunnedOutputKey = '--do';
+            if (index) {
+                this.logPath = path.join(this.logsFolder, `${index}_${this.msr._id}.log`)
+                this.prefixIO = [this.exePath, '-a']
+                let epc = 'shrub';
+                let ini = fs.readFileSync(path.join(this.stdPath, `ini/${index}.ini`), 'utf8')
+                let rst = /epc\/(.*)\.epc/.exec(ini)
+                if(rst)
+                    epc = rst[1]
+                this.ios = {
+                    '--i': `./ini/${index}.ini`,
+                    '--m': `./met/${index}.mtc43`,
+                    '--co2': `./co2/co2.txt`,
+                    '--epc': `./epc/${epc}.epc`,
+                    '--o': `./outputs/${index}`,                    // 这里其实是一个前缀，下载文件时，要当成两个数据处理
+                    '--do': `./outputs/${index}.daily.ascii`,
+                    '--ao': `./outputs/${index}.annual-avg.ascii`,
+                }
+                for (let key in this.ios) {
+                    this.ioFname[key] = path.basename(this.ios[key])
+                }
             }
-            // 输出文件的后缀，
-            // this.oSuffix = {
-            //     '--do': '.dayout.ascii',
-            //     '--ao': '.annout.ascii'
-            // }
-        } else {
+        }
+        else {
+            this.needUpdateSTDRecord = false
             this.logsFolder = setting.geo_data.path
             this.logPath = path.join(this.logsFolder, `${this.msr._id}.log`)
         }
+        this.initialization()
     }
 
     initialization() {
-        for (let key in this.ios) {
-            this.ioFname[key] = path.basename(this.ios[key])
-        }
-        if (this.stdData && this.msr.IO.dataSrc === 'STD') {
+        if (this.msr.IO.dataSrc === 'STD') {
             for (let v of this.prefixIO) {
                 this.cmdLine += `${v} `
             }
@@ -71,17 +66,18 @@ module.exports = class BIOME_BGC_site extends CarbonModelBase {
             _.map(this.msr.IO.inputs, input => {
                 input.fname = this.ioFname[input.id]
             })
-        } else {
+            _.map(this.msr.IO.outputs, output => {
+                output.fname = this.ioFname[output.id]
+            })
+        }
+        else {
             for (let key of this.prefixIO) {
                 this.cmdLine += this.prefixIO[key] + ' '
             }
-            let oid = this.msr._id
-            if (typeof oid !== 'string') {
-                oid = oid.toHexString()
-            }
+            let oid = this.msr._id.toString()
             // TODO 对输入输出文件的处理
             for (let key in this.msr.IO) {
-                if (key !== 'inputs' || key !== 'outputs' || key !== 'parameters')
+                if (key !== 'inputs' && key !== 'outputs' && key !== 'parameters')
                     return;
                 _.map(this.msr.IO[type], event => {
                     if (event.id === '--do' || event.id === '--ao') {
@@ -91,7 +87,7 @@ module.exports = class BIOME_BGC_site extends CarbonModelBase {
                         if (type === 'outputs') {
                             event.value = new ObjectID().toHexString();
                         }
-                        if (type === 'parameters') {
+                        else if (type === 'parameters') {
                             if (event.value)
                                 this.cmdLine += `${event.id}=${event.value}`
                         } else if (event.value && event.value !== '') {
@@ -112,20 +108,6 @@ module.exports = class BIOME_BGC_site extends CarbonModelBase {
             let reg = new RegExp(`(${output.ext})+$`)
             output.fname = output.fname.replace(reg, output.ext)
         })
-        return calcuTaskDB.update({
-            _id: this.msr._id
-        }, {
-            $set: {
-                'IO.inputs': this.msr.IO.inputs,
-                'IO.outputs': this.msr.IO.outputs
-            }
-        })
+        this.exePath = 'node';
     }
-
-    /**
-     * TODO 由于运行时只输入了一个 前缀，所以下载时，要映射到每个输出项上
-     */
-    // download() {
-
-    // }
 }

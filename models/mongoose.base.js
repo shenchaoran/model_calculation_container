@@ -1,17 +1,11 @@
-let Promise = require('bluebird');
+let Bluebird = require('bluebird');
 const mongoose = require('mongoose');
 let _ = require('lodash')
 let ObjectID = require('mongodb').ObjectID
 let setting = require('../config/setting')
 
-mongoose.Promise = require('bluebird');
-const url =
-    'mongodb://' +
-    setting.mongodb.host +
-    ':' +
-    setting.mongodb.port +
-    '/' +
-    setting.mongodb.name;
+mongoose.Promise = Bluebird
+const url = 'mongodb://' + setting.mongodb.host + ':' + setting.mongodb.port + '/' + setting.mongodb.name;
     
 mongoose.connect(url);
 
@@ -27,151 +21,101 @@ mongoose.connection.on('disconnected', () => {
     console.log('******** Mongoose disconnected');
 });
 
-module.exports = function(collectionName, schema) {
-    this.schema = new mongoose.Schema(schema, {
-        collection: collectionName
-    });
-    this.model = mongoose.model(collectionName, this.schema);
-
-    this.findOne = (where) => {
-        return new Promise((resolve, reject) => {
-            this.model.find(where, (err, docs) => {
-                if (err) {
-                    return reject(err);
-                } else {
-                    if(docs.length) {
-                        return resolve(docs[0]._doc);
-                    }
-                    else {
-                        return reject(new Error('No data found!'));
-                    }
-                }
-            });
-        });
-    }
-
-    this.find = (where) => {
-        return new Promise((resolve, reject) => {
-            this.model.find(where, (err, docs) => {
-                if (err) {
-                    return reject(err);
-                } else {
-                    return resolve(_.map(docs, doc => {
-                        return doc.toJSON();
-                    }));
-                }
-            });
-        });
-    }
+module.exports = {
+    findByIds: async function (ids) {
+        try {
+            return Bluebird.map(ids, id => this.findById(id));
+        }
+        catch (e) {
+            console.log(e)
+            return Bluebird.reject(e)
+        }
+    },
 
     /**
-     * 分页查询
-     * return 
+     * ????
+     * @return
      *      {
      *          count: number,
-     *          docs[]
+     *          docs: any[]
      *      }
      */
-    this.findByPage = (where, pageOpt) => {
-        return Promise.all([
-            new Promise((resolve, reject) => {
-                this.model
-                    .find()
-                    .count((err, count) => {
-                        if (err) {
-                            return reject(err)
-                        } else {
-                            return resolve(count);
-                        }
-                    });
-            }),
-            new Promise((resolve, reject) => {
-                this.model
-                    .find(where, (err, docs) => {
-                        if (err) {
-                            return reject(err);
-                        } else {
-                            return resolve(_.map(docs, doc => {
-                                return doc.toJSON();
-                            }));
-                        }
-                    })
+    findByPages: async function (where, pageOpt) {
+        try {
+            let [count, docs] = await Bluebird.all([
+                this.countDocuments(),
+                this
+                    .find(where)
+                    .sort({ _id: -1 })
                     .limit(pageOpt.pageSize)
-                    .skip(pageOpt.pageSize* (pageOpt.pageNum- 1));
-            })
-        ])
-            .then(rsts => {
-                return Promise.resolve({
-                    count: rsts[0],
-                    docs: rsts[1]
-                });
-            })
-            .catch(Promise.reject);
-    }
-
-    this.remove = (where) => {
-        return new Promise((resolve, reject) => {
-            this.model.remove(where, (err, doc) => {
-                if (err) {
-                    return reject(err);
-                } else {
-                    return resolve(doc);
+                    .skip(pageOpt.pageSize * (pageOpt.pageIndex - 1))
+            ])
+            return { count, docs };
+        }
+        catch (e) {
+            console.log(e)
+            return Bluebird.reject(e)
+        }
+    },
+    
+    /**
+     * ????????? ????????????
+     * @return
+     *      {
+     *          count: number,
+     *          docs: any[]
+     *      }
+     */
+    findByUserId: async function (userId) {
+        try {
+            let docs = await this.find().or([
+                {
+                    "auth.userId": userId
+                },
+                {
+                    subscribed_uids: {
+                        $in: [userId]
+                    }
                 }
-            });
-        });
-    }
+            ]).sort({ _id: -1 })
+            return { docs }
+        }
+        catch (e) {
+            console.log(e)
+            return Bluebird.reject(e)
+        }
+    },
 
-    this.insert = (item) => {
-        const model = new this.model(item);
-        return new Promise((resolve, reject) => {
-            model.save((err, rst) => {
-                if (err) {
-                    return reject(err);
-                } else {
-                    return resolve(rst._doc);
-                }
-            });
-        });
-    }
-
-    this.insertBatch = (docs, options) => {
-        return new Promise((resolve, reject) => {
-            this.model.collection.insert(docs, options, (err, rst) => {
-                if(err) {
-                    return reject(err);
-                }
-                else {
-                    return resolve(rst);
-                }
-            });
-        });
-    }
-
-    this.update = (where, update, options) => {
-        return new Promise((resolve, reject) => {
-            this.model.update(where, update, options, (err, rst) => {
-                if (err) {
-                    return reject(err);
-                } else {
-                    return resolve(rst);
-                }
-            });
-        });
-    }
-
-    this.upsert = (where, update, options) => {
-        return new Promise((resolve, reject) => {
-            if(options === undefined) {
-                options = {};
-            }
+    upsert: async function (where, update, options) {
+        try {
+            !!options || (options = {})
             options.upsert = true;
-            this.model.update(where, update, options, (err, rst) => {
-                if (err) {
-                    return reject(err);
-                } else {
-                    return resolve(rst);
-                }
-            });
-        });
-    }
+            return this.updateOne(where, update, options)
+        }
+        catch (e) {
+            console.log(e)
+            return Bluebird.reject(e)
+        }
+    },
+
+    insert: async function (item) {
+        try {
+            let queryId
+            if (item._id) {
+                queryId = item._id;
+            }
+            else {
+                queryId = new ObjectID();
+                item._id = queryId;
+            }
+            return this.updateOne({ _id: queryId }, item, { upsert: true })
+                .then(rst => {
+                    return item
+                })
+        }
+        catch (e) {
+            console.log(e)
+            return Bluebird.reject(e)
+        }
+    },
 }

@@ -15,7 +15,7 @@ module.exports = router;
 router.route('/')
     .post((req, res, next) => {
         let form = new formidable.IncomingForm();
-        form.encoding = 'utf-8';
+        form.encoding = 'utf8';
         form.uploadDir = setting.geo_data.path;
         form.keepExtensions = true;
         form.maxFieldsSize = setting.geo_data.max_size;

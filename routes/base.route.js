@@ -26,15 +26,12 @@ module.exports = (router, db, defaultRoutes) => {
                     }
 
                     db
-                        .findByPage({}, {
+                        .findByPages({}, {
                             pageSize: req.query.pageSize,
                             pageNum: req.query.pageNum
                         })
-                        .then(docs => {
-                            res.locals.resData = docs;
-                            res.locals.template = {};
-                            res.locals.succeed = true;
-                            return next();
+                        .then(rst => {
+                            return res.json({data: rst})
                         })
                         .catch(next);
                 });
@@ -46,11 +43,8 @@ module.exports = (router, db, defaultRoutes) => {
                     if (req.params.id) {
                         db
                             .findOne({ _id: req.params.id })
-                            .then(doc => {
-                                res.locals.resData = doc;
-                                res.locals.template = {};
-                                res.locals.succeed = true;
-                                return next();
+                            .then(rst => {
+                                return res.json({data: rst})
                             })
                             .catch(next);
                     } else {
@@ -65,11 +59,8 @@ module.exports = (router, db, defaultRoutes) => {
                     if (req.body.doc) {
                         db
                             .insert(req.body.doc)
-                            .then(doc => {
-                                res.locals.resData = doc;
-                                res.locals.template = {};
-                                res.locals.succeed = true;
-                                return next();
+                            .then(rst => {
+                                return res.json({data: rst})
                             })
                             .catch(next);
                     } else {
@@ -84,12 +75,9 @@ module.exports = (router, db, defaultRoutes) => {
                     if (req.body.doc) {
                         db
                             .update({ _id: req.body.id }, req.body.doc)
-                            .then((doc) => {
+                            .then(rst => {
                                 // TODO 此doc非彼doc
-                                res.locals.resData = doc;
-                                res.locals.template = {};
-                                res.locals.succeed = true;
-                                return next();
+                                return res.json({data: rst})
                             })
                             .catch(next);
                     } else {
@@ -103,11 +91,8 @@ module.exports = (router, db, defaultRoutes) => {
                 .delete((req, res, next) => {
                     db
                         .remove({ _id: req.params.id })
-                        .then((doc) => {
-                            res.locals.resData = doc;
-                            res.locals.template = {};
-                            res.locals.succeed = true;
-                            return next();
+                        .then(rst => {
+                            return res.json({data: rst})
                         })
                         .catch(next);
                 });
