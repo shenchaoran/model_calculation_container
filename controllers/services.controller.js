@@ -1,7 +1,7 @@
-const Blueblrd = require('bluebird');
+const Bluebird = require('bluebird');
 const path = require('path');
 const ObjectID = require('mongodb').ObjectID;
-const fs = Blueblrd.promisifyAll(require('fs'));
+const fs = Bluebird.promisifyAll(require('fs'));
 const unzip = require('unzip');
 const setting = require('../config/setting');
 const _ = require('lodash');
@@ -18,7 +18,7 @@ module.exports = ServicesCtrl = function() {}
 ServicesCtrl.prototype.invoke = async (calcuTask) => {
     try {
         let modelInstance = await ModelFactory(calcuTask)
-        return modelInstance.invoke().catch(Blueblrd.reject)
+        return modelInstance.invoke().catch(Bluebird.reject)
     }
     catch(e) {
         console.log(e)

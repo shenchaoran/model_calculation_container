@@ -4,7 +4,7 @@ let path = require('path')
 
 module.exports = {
     nodeName: "scr-windows",
-    host: '172.21.213.253',
+    host: '192.168.190.128',
     port: 6868,
     auth: false,
     jwt_secret: 'asdl;fjl;asdjflasjkfsl;jfdl;asdfjl;asdjkflsda',
@@ -44,8 +44,8 @@ module.exports = {
     // 换部署服务器时，这里也要更新成对应的文件路径
     STD_DATA: {
         // 'IBIS_2.6b4': '/home/shencr/STD_DATA/IBIS_2.6b4',
-        'IBIS site': '/home/scr/Data/IBIS_Data',
-        'Biome-BGC site': '/home/scr/Data/Biome_BGC_Data',
+        'IBIS site': '/home/shencr/Data/IBIS_Data',
+        'Biome-BGC site': '/home/shencr/Data/Biome_BGC_Data',
         'LPJ': '',
         'IBIS global': '',              // 这个标准数据集存在上传文件夹中
         'Biome-BGC global': '',         // 这个标准数据集存在上传文件夹中

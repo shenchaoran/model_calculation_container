@@ -241,6 +241,9 @@ module.exports = class ModelBase {
             } else {
                 try {
                     await fs.accessAsync(this.ios[this.hadRunnedOutputKey], fs.constants.F_OK)
+                    let stats = await fs.statAsync(this.ios[this.hadRunnedOutputKey])
+                    if(stats.size === '0' || stats.size === 0)
+                        return false;
                     return true;
                 } catch (e) {
                     return false;
